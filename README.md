@@ -8,6 +8,15 @@ Built with a **safety-first clinical architecture**, SafeSteps runs high-sensiti
 
 ---
 
+## 🌐 Live Production Deployment
+
+- **Production URL:** [https://safesteps-kappa.vercel.app](https://safesteps-kappa.vercel.app)
+- **Alternate Domain:** [https://safesteps-projects-f4ef.vercel.app](https://safesteps-projects-f4ef.vercel.app)
+- **Health Check Probe:** [https://safesteps-kappa.vercel.app/api/health](https://safesteps-kappa.vercel.app/api/health)
+- **GitHub Repository:** [https://github.com/mujahith9025/SafeSteps](https://github.com/mujahith9025/SafeSteps)
+
+---
+
 ## ⚠️ Mandatory Medical Disclaimer
 
 > [!IMPORTANT]

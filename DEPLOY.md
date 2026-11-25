@@ -1,7 +1,10 @@
 # SafeSteps — Vercel Production Deployment Guide
 
 > **Target Platform:** Vercel (Next.js App Router Serverless Platform)  
-> **Prerequisites:** GitHub account, Vercel account, Google Gemini API key from [Google AI Studio](https://aistudio.google.com/).
+> **Production URL:** [https://safesteps-kappa.vercel.app](https://safesteps-kappa.vercel.app)  
+> **Alternate URL:** [https://safesteps-projects-f4ef.vercel.app](https://safesteps-projects-f4ef.vercel.app)  
+> **GitHub Repository:** [https://github.com/mujahith9025/SafeSteps](https://github.com/mujahith9025/SafeSteps)  
+> **Status:** 🟢 **LIVE & OPERATIONAL**  
 
 ---
 
