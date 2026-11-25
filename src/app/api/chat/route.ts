@@ -77,6 +77,134 @@ async function callGemini(
 }
 
 /**
+ * Normalizes minor model JSON naming variations into the exact schema structure.
+ */
+function normalizeModelOutput(parsed: any): any {
+  if (!parsed || typeof parsed !== "object") return parsed;
+
+  const normalized = { ...parsed };
+
+  // Infer missing type
+  if (!normalized.type) {
+    if (
+      normalized.urgency ||
+      normalized.urgency_level ||
+      normalized.urgencyLevel ||
+      normalized.headline ||
+      normalized.suggests ||
+      normalized.actions
+    ) {
+      normalized.type = "result";
+    } else {
+      normalized.type = "question";
+    }
+  }
+
+  // Normalize question fields
+  if (normalized.type === "question") {
+    if (!normalized.message) {
+      if (typeof normalized.question === "string") {
+        normalized.message = normalized.question;
+      } else if (typeof normalized.text === "string") {
+        normalized.message = normalized.text;
+      } else if (typeof normalized.content === "string") {
+        normalized.message = normalized.content;
+      } else if (Array.isArray(normalized.questions)) {
+        normalized.message = normalized.questions.join("\n\n");
+      }
+    }
+  }
+
+  // Normalize result fields
+  if (normalized.type === "result") {
+    // Urgency normalization
+    if (!normalized.urgency) {
+      const u =
+        normalized.urgency_level ||
+        normalized.urgencyLevel ||
+        normalized.tier ||
+        normalized.level;
+      if (u) normalized.urgency = u;
+    }
+    if (typeof normalized.urgency === "string") {
+      const uLower = normalized.urgency.toLowerCase().trim().replace(/[-\s]/g, "_");
+      if (uLower.includes("self") || uLower.includes("home")) {
+        normalized.urgency = "self_care";
+      } else if (
+        uLower.includes("doctor") ||
+        uLower.includes("soon") ||
+        uLower.includes("clinic")
+      ) {
+        normalized.urgency = "see_doctor_soon";
+      } else if (uLower.includes("emerg") || uLower.includes("urgent")) {
+        normalized.urgency = "emergency";
+      }
+    }
+
+    // Headline normalization
+    if (!normalized.headline) {
+      normalized.headline =
+        normalized.title ||
+        normalized.heading ||
+        normalized.summary ||
+        "Health Guidance Assessment";
+    }
+
+    // Suggests normalization
+    if (!normalized.suggests) {
+      normalized.suggests =
+        normalized.suggestion ||
+        normalized.summary ||
+        normalized.description ||
+        normalized.details ||
+        normalized.headline ||
+        "";
+    }
+
+    // Actions normalization
+    if (!normalized.actions) {
+      const acts =
+        normalized.recommendations ||
+        normalized.steps ||
+        normalized.action ||
+        normalized.next_steps;
+      if (Array.isArray(acts)) normalized.actions = acts;
+      else if (typeof acts === "string") normalized.actions = [acts];
+    }
+    if (Array.isArray(normalized.actions)) {
+      normalized.actions = normalized.actions
+        .map((a: any) => (typeof a === "string" ? a.trim() : String(a || "")))
+        .filter((a: string) => a.length > 0);
+    }
+    if (!normalized.actions || normalized.actions.length === 0) {
+      normalized.actions = ["Rest comfortably in a calm environment", "Stay well hydrated with clean water"];
+    }
+
+    // Warning signs normalization
+    if (!normalized.warning_signs) {
+      const ws =
+        normalized.warningSigns ||
+        normalized.warning_sign ||
+        normalized.warnings ||
+        normalized.redFlags ||
+        normalized.red_flags;
+      if (Array.isArray(ws)) normalized.warning_signs = ws;
+      else if (typeof ws === "string") normalized.warning_signs = [ws];
+    }
+    if (Array.isArray(normalized.warning_signs)) {
+      normalized.warning_signs = normalized.warning_signs
+        .map((w: any) => (typeof w === "string" ? w.trim() : String(w || "")))
+        .filter((w: string) => w.length > 0);
+    }
+    if (!normalized.warning_signs || normalized.warning_signs.length === 0) {
+      normalized.warning_signs = ["Sudden severe worsening of symptoms", "Difficulty breathing or chest tightness"];
+    }
+  }
+
+  return normalized;
+}
+
+/**
  * Validates raw model output text against the question or result schemas.
  */
 function validateModelOutput(
@@ -92,7 +220,8 @@ function validateModelOutput(
       .replace(/\s*```$/i, "")
       .trim();
 
-    const parsed = JSON.parse(cleanJson);
+    const parsedRaw = JSON.parse(cleanJson);
+    const parsed = normalizeModelOutput(parsedRaw);
 
     // Validate result shape first
     const resultCheck = resultResponseSchema.safeParse(parsed);
