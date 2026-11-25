@@ -65,7 +65,10 @@ async function callGemini(
       systemInstruction,
       responseMimeType: "application/json",
       temperature: 0.3,
-      maxOutputTokens: 800,
+      maxOutputTokens: 2048,
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
       httpOptions: {
         timeout: 20000,
       },
@@ -205,6 +208,49 @@ function normalizeModelOutput(parsed: any): any {
 }
 
 /**
+ * Attempts to repair slightly truncated or malformed JSON strings by closing unclosed quotes, brackets, and braces.
+ */
+function tryRepairJson(str: string): any {
+  try {
+    return JSON.parse(str);
+  } catch {
+    let repaired = str.trim();
+    // Close open string if odd number of quotes
+    const quoteCount = (repaired.match(/"/g) || []).length;
+    if (quoteCount % 2 !== 0) {
+      repaired += '"';
+    }
+    let openBrackets = 0;
+    let openBraces = 0;
+    let inString = false;
+    for (let i = 0; i < repaired.length; i++) {
+      const c = repaired[i];
+      if (c === '"' && (i === 0 || repaired[i - 1] !== '\\')) {
+        inString = !inString;
+      } else if (!inString) {
+        if (c === '[') openBrackets++;
+        else if (c === ']') openBrackets = Math.max(0, openBrackets - 1);
+        else if (c === '{') openBraces++;
+        else if (c === '}') openBraces = Math.max(0, openBraces - 1);
+      }
+    }
+    while (openBrackets > 0) {
+      repaired += ']';
+      openBrackets--;
+    }
+    while (openBraces > 0) {
+      repaired += '}';
+      openBraces--;
+    }
+    try {
+      return JSON.parse(repaired);
+    } catch {
+      return null;
+    }
+  }
+}
+
+/**
  * Validates raw model output text against the question or result schemas.
  */
 function validateModelOutput(
@@ -220,7 +266,9 @@ function validateModelOutput(
       .replace(/\s*```$/i, "")
       .trim();
 
-    const parsedRaw = JSON.parse(cleanJson);
+    const parsedRaw = tryRepairJson(cleanJson);
+    if (!parsedRaw) return null;
+
     const parsed = normalizeModelOutput(parsedRaw);
 
     // Validate result shape first
