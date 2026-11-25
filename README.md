@@ -31,6 +31,7 @@ Built with a **safety-first clinical architecture**, SafeSteps runs high-sensiti
 
 ## 🌟 Key Features
 
+- **Dual-Engine AI Architecture**: Powered by **Groq** (`openai/gpt-oss-120b`) delivering ultra-fast 300ms clinical triage with 14,400 daily requests, backed by **Google Gemini** (`gemini-3.5-flash`) with automatic graceful failover.
 - **Clinical Triage Follow-Up**: Gathers symptom context through 3 to 5 targeted, conversational questions (duration, severity, age group, existing conditions) in a single calming message without demanding personal identifiers.
 - **3-Tier Urgency Classification**:
   - 🟢 **Level 1 (Self-Care at Home)**: Mild, reversible symptoms manageable with rest, hydration, comfort measures, and watchful waiting.
