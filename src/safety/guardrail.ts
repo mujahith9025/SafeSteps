@@ -87,10 +87,10 @@ function containsAssertiveYouHave(text: string): boolean {
   while ((match = youHaveRegex.exec(text)) !== null) {
     const matchIndex = match.index;
 
-    // Check preceding words (e.g. "if you have", "whether you have", "ensure you have")
-    const precedingText = text.substring(Math.max(0, matchIndex - 30), matchIndex).toLowerCase().trim();
+    // Check preceding words (e.g. "if you have", "whether you have", "ensure you have", "hear that you have")
+    const precedingText = text.substring(Math.max(0, matchIndex - 50), matchIndex).toLowerCase().trim();
     const isPrecededByHarmless = HARMLESS_YOU_HAVE_PRECEDING.some((word) => {
-      const pattern = new RegExp(`(?:^|\\b)${word}\\s+(?:any\\s+|a\\s+)?$`, "i");
+      const pattern = new RegExp(`(?:^|\\b)${word}\\s*(?:any\\s+|a\\s+)?$`, "i");
       return pattern.test(precedingText);
     });
 
