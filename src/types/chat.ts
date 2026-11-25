@@ -29,6 +29,7 @@ export interface Message {
   timestamp: string;
   type?: "question" | "result" | "emergency";
   result?: UrgencyResult;
+  quick_replies?: string[];
 }
 
 /**
@@ -57,4 +58,5 @@ export interface ApiResponse {
   result?: UrgencyResult;
   reason?: string;
   category?: string;
+  quick_replies?: string[];
 }

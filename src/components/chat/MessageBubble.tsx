@@ -10,6 +10,10 @@ export interface MessageBubbleProps {
   timestamp?: string;
   status?: "sent" | "delivered" | "read";
   result?: UrgencyResult;
+  quickReplies?: string[];
+  onSelectChip?: (text: string) => void;
+  isLatest?: boolean;
+  disabled?: boolean;
 }
 
 export function MessageBubble({
@@ -18,6 +22,10 @@ export function MessageBubble({
   content,
   timestamp = "10:14 AM",
   result,
+  quickReplies,
+  onSelectChip,
+  isLatest = false,
+  disabled = false,
 }: MessageBubbleProps) {
   if (role === "user") {
     return (
@@ -101,6 +109,33 @@ export function MessageBubble({
                   </ul>
                 </div>
               )}
+            </div>
+          )}
+          {/* Interactive Tap-to-Answer Quick Replies */}
+          {quickReplies && quickReplies.length > 0 && isLatest && (
+            <div className="mt-3.5 pt-3 border-t border-border/70 animate-fade-in">
+              <div className="text-xs font-semibold uppercase tracking-wider text-primary mb-2 flex items-center gap-1.5 select-none">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span>Quick Responses (Tap to reply):</span>
+              </div>
+              <div
+                className="flex flex-wrap items-center gap-2"
+                role="group"
+                aria-label="Suggested quick reply options"
+              >
+                {quickReplies.map((chip, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onSelectChip?.(chip)}
+                    className="group/chip inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs sm:text-caption font-medium bg-surface hover:bg-primary-light active:bg-primary/20 text-primary border border-primary/30 hover:border-primary transition-all cursor-pointer shadow-2xs hover:shadow-xs active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/70 group-hover/chip:scale-125 transition-transform" />
+                    <span>{chip}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

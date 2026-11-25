@@ -16,8 +16,14 @@ export const INITIAL_WELCOME_MESSAGE: Message = {
   id: "welcome-message",
   role: "assistant",
   content:
-    "Hello, I'm SafeSteps. Tell me what you're feeling, and I'll ask a few questions to understand better. How can I help today?",
+    "Hello, I'm SafeSteps. Tell me what you're feeling, and I'll help guide you on the safest next steps. How can I help today?",
   timestamp: "10:14 AM",
+  quick_replies: [
+    "I have a headache",
+    "Stomach pain & nausea",
+    "Fever & cold symptoms",
+    "Feeling dizzy or weak",
+  ],
 };
 
 export type ChatErrorType = "error" | "rate_limit" | "offline" | null;
@@ -118,6 +124,7 @@ export function useChat(options?: UseChatOptions) {
           timestamp: formatTime(),
           type: response.type,
           result: response.result,
+          quick_replies: response.quick_replies,
         };
 
         setMessages((prev) => [...prev, assistantMessage]);

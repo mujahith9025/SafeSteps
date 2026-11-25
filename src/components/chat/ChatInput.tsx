@@ -20,6 +20,8 @@ export function ChatInput({
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [emptyAttempted, setEmptyAttempted] = useState<boolean>(false);
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const recognitionRef = useRef<any>(null);
 
   // Auto-grow textarea up to max 140px (~5 lines)
   useEffect(() => {
@@ -29,6 +31,77 @@ export function ChatInput({
       el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
     }
   }, [value]);
+
+  // Clean up speech recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore cleanup errors
+        }
+      }
+    };
+  }, []);
+
+  const toggleVoiceInput = () => {
+    if (disabled || isOffline) return;
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {
+          // ignore
+        }
+      }
+      setIsListening(false);
+      return;
+    }
+
+    if (typeof window === "undefined") return;
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please type your message.");
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-IN";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results?.[0]?.[0]?.transcript;
+        if (transcript) {
+          const newText = value.trim() ? `${value.trim()} ${transcript}` : transcript;
+          onChange(newText);
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch {
+      setIsListening(false);
+    }
+  };
 
   const charCount = value.length;
   const isTooLong = charCount > 1000;
@@ -122,12 +195,17 @@ export function ChatInput({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="h-10 w-10 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center text-text-muted hover:text-primary hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              aria-label="Voice input dictation"
-              title="Voice dictation"
+              onClick={toggleVoiceInput}
+              className={`h-10 w-10 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                isListening
+                  ? "bg-red-50 text-red-600 animate-pulse border border-red-300"
+                  : "text-text-muted hover:text-primary hover:bg-slate-100"
+              }`}
+              aria-label={isListening ? "Listening... click to stop" : "Voice input dictation"}
+              title={isListening ? "Listening... click to stop recording" : "Voice dictation (click to speak)"}
               disabled={disabled || isOffline}
             >
-              <Mic className="h-5 w-5" aria-hidden="true" />
+              <Mic className={`h-5 w-5 ${isListening ? "text-red-600" : ""}`} aria-hidden="true" />
             </button>
             <span
               id="char-count"

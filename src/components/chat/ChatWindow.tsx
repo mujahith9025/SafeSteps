@@ -120,6 +120,10 @@ export function ChatWindow() {
                 role={msg.role}
                 content={msg.content}
                 timestamp={msg.timestamp}
+                quickReplies={msg.quick_replies}
+                onSelectChip={handleChipSelect}
+                isLatest={index === messages.length - 1}
+                disabled={isLoading || !isOnline}
               />
             );
           })}

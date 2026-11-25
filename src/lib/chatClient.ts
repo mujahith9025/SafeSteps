@@ -125,5 +125,6 @@ export async function sendMessageToApi(
       data.message ||
       data.content ||
       "Could you tell me a bit more about what symptoms you are experiencing?",
+    quick_replies: Array.isArray(data.quick_replies) ? data.quick_replies : [],
   };
 }

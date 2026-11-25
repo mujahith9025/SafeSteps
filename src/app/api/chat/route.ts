@@ -147,6 +147,66 @@ function normalizeModelOutput(parsed: any): any {
         normalized.message = normalized.questions.join("\n\n");
       }
     }
+
+    // Quick replies normalization
+    if (!normalized.quick_replies) {
+      if (Array.isArray(normalized.options)) normalized.quick_replies = normalized.options;
+      else if (Array.isArray(normalized.suggestions)) normalized.quick_replies = normalized.suggestions;
+      else if (Array.isArray(normalized.quickReplies)) normalized.quick_replies = normalized.quickReplies;
+      else if (Array.isArray(normalized.chips)) normalized.quick_replies = normalized.chips;
+    }
+
+    if (Array.isArray(normalized.quick_replies)) {
+      normalized.quick_replies = normalized.quick_replies
+        .map((q: any) => (typeof q === "string" ? q.trim() : String(q || "")))
+        .filter((q: string) => q.length > 0 && q.length <= 60)
+        .slice(0, 6);
+    }
+
+    // Contextual fallback quick replies if model did not produce them
+    if (!Array.isArray(normalized.quick_replies) || normalized.quick_replies.length === 0) {
+      const msgLower = (normalized.message || "").toLowerCase();
+      const generatedChips: string[] = [];
+
+      if (
+        msgLower.includes("scale") ||
+        msgLower.includes("1 to 10") ||
+        msgLower.includes("1-10") ||
+        msgLower.includes("severe") ||
+        msgLower.includes("intensity")
+      ) {
+        generatedChips.push("Mild pain (1-3)", "Moderate pain (4-6)", "Severe pain (7-10)");
+      }
+      if (
+        msgLower.includes("how long") ||
+        msgLower.includes("duration") ||
+        msgLower.includes("start") ||
+        msgLower.includes("when")
+      ) {
+        generatedChips.push("Started today", "1-2 days ago", "3+ days ago");
+      }
+      if (
+        msgLower.includes("other") ||
+        msgLower.includes("fever") ||
+        msgLower.includes("symptom") ||
+        msgLower.includes("accompanying")
+      ) {
+        generatedChips.push("No other symptoms", "Mild fever", "Feeling nauseous");
+      }
+      if (
+        msgLower.includes("age") ||
+        msgLower.includes("pregnant") ||
+        msgLower.includes("condition")
+      ) {
+        generatedChips.push("Adult (18-50)", "No chronic conditions");
+      }
+
+      if (generatedChips.length > 0) {
+        normalized.quick_replies = Array.from(new Set(generatedChips)).slice(0, 5);
+      } else {
+        normalized.quick_replies = ["Mild discomfort", "Moderate pain", "Started today", "No other symptoms"];
+      }
+    }
   }
 
   // Normalize result fields
@@ -472,6 +532,7 @@ export async function POST(req: NextRequest) {
           type: "question",
           message: validatedData.message,
           content: validatedData.message,
+          quick_replies: (validatedData as any).quick_replies || [],
         },
         { status: 200 }
       );

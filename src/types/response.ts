@@ -8,6 +8,8 @@ import { z } from "zod";
 export const questionResponseSchema = z.object({
   type: z.literal("question"),
   message: z.string().min(1, "Question message cannot be empty."),
+  quick_replies: z.array(z.string()).optional(),
+  options: z.array(z.string()).optional(),
 });
 
 export const resultResponseSchema = z.object({
