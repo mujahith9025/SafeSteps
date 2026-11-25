@@ -18,6 +18,7 @@ import path from "path";
 import { checkEmergency } from "@/safety/emergency";
 import { checkOutput } from "@/safety/guardrail";
 import { getGeminiClient, getGeminiModel } from "@/lib/gemini";
+import { getGroqApiKey, callGroq } from "@/lib/groq";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import {
   questionResponseSchema,
@@ -77,6 +78,36 @@ async function callGemini(
   });
 
   return response.text || "";
+}
+
+/**
+ * Generates an AI response using the dual-engine strategy:
+ * 1. Groq (openai/gpt-oss-120b) as the high-speed primary engine (14,400 req/day, 300ms latency)
+ * 2. Automatic graceful fallback to Google Gemini if Groq is unavailable or unconfigured
+ */
+async function generateAIResponse(
+  messages: Array<{ role: string; content: string }>,
+  systemPrompt: string
+): Promise<string> {
+  if (getGroqApiKey()) {
+    try {
+      return await callGroq(messages, systemPrompt);
+    } catch (groqErr) {
+      console.warn(
+        "[SafeSteps AI Engine] Groq engine error, falling back to Gemini:",
+        groqErr instanceof Error ? groqErr.message : String(groqErr)
+      );
+    }
+  }
+
+  const client = getGeminiClient();
+  const model = getGeminiModel();
+  const contents = messages.map((msg) => ({
+    role: msg.role === "assistant" ? "model" : "user",
+    parts: [{ text: msg.content }],
+  }));
+
+  return await callGemini(client, model, contents, systemPrompt);
 }
 
 /**
@@ -374,21 +405,7 @@ export async function POST(req: NextRequest) {
     }
 
     // -----------------------------------------------------------------------
-    // Step 4: Create / retrieve Gemini client and model configuration
-    // -----------------------------------------------------------------------
-    const client = getGeminiClient();
-    const model = getGeminiModel();
-
-    // -----------------------------------------------------------------------
-    // Step 5: Send system prompt & conversation contents to Gemini
-    // -----------------------------------------------------------------------
-    const contents = messages.map((msg) => ({
-      role: msg.role === "assistant" ? "model" : "user",
-      parts: [{ text: msg.content }],
-    }));
-
-    // -----------------------------------------------------------------------
-    // Step 6: Validate output schema & output guardrail with single retry
+    // Step 4: Validate output schema & output guardrail with single retry
     // -----------------------------------------------------------------------
     const SAFETY_RETRY_INSTRUCTION =
       "Your previous reply broke a safety rule. Reply again without diagnoses, doses or prescriptions.";
@@ -399,7 +416,7 @@ export async function POST(req: NextRequest) {
 
     try {
       // First attempt
-      const textAttempt1 = await callGemini(client, model, contents, systemPrompt);
+      const textAttempt1 = await generateAIResponse(messages, systemPrompt);
       const parsed1 = validateModelOutput(textAttempt1);
 
       if (parsed1) {
@@ -417,7 +434,7 @@ export async function POST(req: NextRequest) {
       // Single retry if first attempt did not pass schema or guardrail check
       if (!validatedData) {
         const retrySystemPrompt = `${systemPrompt}\n\nIMPORTANT INSTRUCTION: ${SAFETY_RETRY_INSTRUCTION}`;
-        const textAttempt2 = await callGemini(client, model, contents, retrySystemPrompt);
+        const textAttempt2 = await generateAIResponse(messages, retrySystemPrompt);
         const parsed2 = validateModelOutput(textAttempt2);
 
         if (parsed2) {
