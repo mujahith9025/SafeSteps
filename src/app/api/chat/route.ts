@@ -105,9 +105,9 @@ async function generateAIResponse(
     try {
       return await callGroq(messages, systemPrompt);
     } catch (groqErr) {
+      const errName = groqErr instanceof Error ? groqErr.name : "GroqError";
       console.warn(
-        "[SafeSteps AI Engine] Groq engine error, falling back to Gemini:",
-        groqErr instanceof Error ? groqErr.message : String(groqErr)
+        `[SafeSteps AI Engine] Groq engine fallback to Gemini (Type: ${errName})`
       );
     }
   }
@@ -519,7 +519,8 @@ export async function POST(req: NextRequest) {
         }
       } catch (dbErr) {
         // SafeSteps non-blocking DB resilience: NEVER let DB errors fail triage
-        console.warn("[SafeSteps DB Warning] Could not persist user message:", dbErr);
+        const code = (dbErr as any)?.code || (dbErr as any)?.name || "DatabaseError";
+        console.warn(`[SafeSteps DB Warning] Could not persist user message (Code: ${code})`);
       }
     }
 
@@ -558,7 +559,8 @@ export async function POST(req: NextRequest) {
               .eq("id", activeConversationId)
               .eq("user_id", user.id);
           } catch (dbErr) {
-            console.warn("[SafeSteps DB Warning on Emergency]", dbErr);
+            const code = (dbErr as any)?.code || (dbErr as any)?.name || "DatabaseError";
+            console.warn(`[SafeSteps DB Warning on Emergency] Code: ${code}`);
           }
         }
 
@@ -719,7 +721,8 @@ export async function POST(req: NextRequest) {
             .eq("user_id", user.id);
         }
       } catch (dbErr) {
-        console.warn("[SafeSteps DB Warning on Assistant Message]", dbErr);
+        const code = (dbErr as any)?.code || (dbErr as any)?.name || "DatabaseError";
+        console.warn(`[SafeSteps DB Warning on Assistant Message] Code: ${code}`);
       }
     }
 
