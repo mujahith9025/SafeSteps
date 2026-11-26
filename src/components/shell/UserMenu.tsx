@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import { logoutAction } from '@/app/(auth)/actions'
+import { useTranslations } from 'next-intl'
 
 export interface UserMenuProps {
   user?: {
@@ -39,6 +40,7 @@ function getInitials(name?: string | null, email?: string | null): string {
 export function UserMenu({ user, isCollapsed = false, className = '' }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const t = useTranslations('shell')
 
   const displayName = user?.name?.trim() || 'Ananya Patel'
   const displayEmail = user?.email?.trim() || 'ananya.patel@healthnet.nhs.uk'
@@ -148,7 +150,7 @@ export function UserMenu({ user, isCollapsed = false, className = '' }: UserMenu
               className="w-full px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-100 rounded-lg flex items-center gap-2.5 transition-colors font-medium"
             >
               <UserIcon className="w-4 h-4 text-slate-500" />
-              <span>Health profile</span>
+              <span>{t('userMenuProfile')}</span>
             </Link>
 
             <Link
@@ -158,7 +160,7 @@ export function UserMenu({ user, isCollapsed = false, className = '' }: UserMenu
               className="w-full px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-100 rounded-lg flex items-center gap-2.5 transition-colors font-medium"
             >
               <SettingsIcon className="w-4 h-4 text-slate-500" />
-              <span>Settings</span>
+              <span>{t('userMenuSettings')}</span>
             </Link>
           </div>
 
@@ -172,7 +174,7 @@ export function UserMenu({ user, isCollapsed = false, className = '' }: UserMenu
               className="w-full px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg flex items-center gap-2.5 font-medium transition-colors"
             >
               <LogOut className="w-4 h-4 text-red-500" />
-              <span>Log out</span>
+              <span>{t('userMenuLogOut')}</span>
             </button>
           </form>
         </div>

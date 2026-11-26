@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useChat } from "@/hooks/useChat";
 import { Message } from "@/types/chat";
 import { renameConversationAction } from "@/app/(app)/history/actions";
@@ -36,6 +37,7 @@ export function ChatWindow({
 }: ChatWindowProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const locale = useLocale();
   const isOnline = useOnlineStatus();
   const initialSymptomHandled = useRef<boolean>(false);
   const {
@@ -55,6 +57,7 @@ export function ChatWindow({
     initialMessages,
     initialConversationId,
     initialTitle,
+    language: locale,
     onEmergency: (category) => {
       const query = category ? `?category=${encodeURIComponent(category)}` : "";
       router.push(`/emergency${query}`);

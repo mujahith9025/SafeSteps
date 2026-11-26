@@ -34,6 +34,7 @@ export interface UseChatOptions {
   initialMessages?: Message[];
   initialConversationId?: string | null;
   initialTitle?: string;
+  language?: string;
 }
 
 export function useChat(options?: UseChatOptions) {
@@ -129,7 +130,11 @@ export function useChat(options?: UseChatOptions) {
         }));
 
       try {
-        const response = await sendMessageToApi(conversationPayload, conversationId);
+        const response = await sendMessageToApi(
+          conversationPayload,
+          conversationId,
+          options?.language
+        );
 
         if (response.conversationId && response.conversationId !== conversationId) {
           setConversationId(response.conversationId);

@@ -59,6 +59,7 @@ export const chatRequestSchema = z.object({
     .min(1, "Please provide at least one message.")
     .max(20, "Conversation history cannot exceed 20 messages."),
   conversationId: z.string().uuid().optional().nullable(),
+  language: z.enum(["en", "ta", "hi"]).optional().default("en"),
 });
 
 /**
@@ -442,7 +443,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: friendlyMessage }, { status: 400 });
     }
 
-    const { messages, conversationId } = parseResult.data;
+    const { messages, conversationId, language } = parseResult.data;
+    const activeLanguage = language || "en";
 
     const latestUserMessage = [...messages].reverse().find((m) => m.role === "user");
 
@@ -496,7 +498,7 @@ export async function POST(req: NextRequest) {
             .insert({
               user_id: user.id,
               title: autoTitle,
-              language: "en",
+              language: activeLanguage,
             })
             .select("id")
             .single();
@@ -577,7 +579,7 @@ export async function POST(req: NextRequest) {
     try {
       if (latestUserMessage) {
         const retrievalQuery = buildRetrievalQuery(latestUserMessage.content, messages);
-        retrievedChunks = await retrieveContext(retrievalQuery, "en", { supabaseClient: supabase });
+        retrievedChunks = await retrieveContext(retrievalQuery, activeLanguage, { supabaseClient: supabase });
       }
     } catch (retrievalErr: any) {
       // Non-blocking fault tolerance: log error category only, never fail safety or triage
@@ -596,6 +598,15 @@ export async function POST(req: NextRequest) {
       systemPrompt =
         "You are SafeSteps, a calm and trustworthy health guidance assistant. Provide clear, non-diagnostic guidance in valid JSON format.";
     }
+
+    // Explicit Language Instruction
+    const languageLabel =
+      activeLanguage === "ta"
+        ? "Tamil (தமிழ்)"
+        : activeLanguage === "hi"
+        ? "Hindi (हिन्दी)"
+        : "English";
+    systemPrompt += `\n\nLANGUAGE INSTRUCTION: Reply in ${languageLabel}. Provide all natural language text (message, headline, suggests, actions, warning_signs) in ${languageLabel}. Keep JSON field names strictly in English as specified in the schema.`;
 
     // Attach untrusted user health profile context if personalization is enabled
     if (userProfile && userProfile.personalise) {

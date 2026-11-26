@@ -9,6 +9,7 @@ import {
   FileText,
   Lock,
 } from 'lucide-react'
+import { SettingsLanguageSection } from '@/components/settings/SettingsLanguageSection'
 
 export const metadata: Metadata = {
   title: 'Settings | SafeSteps',
@@ -30,6 +31,9 @@ export default function SettingsPage() {
 
       {/* Settings Grid */}
       <div className="space-y-5">
+        {/* Language Selection Card (Stitch panel-language) */}
+        <SettingsLanguageSection />
+
         {/* Consent & Regulatory Status Card */}
         <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs space-y-4">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-100">

@@ -12,6 +12,7 @@ import {
   Hourglass,
   Phone,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const ALLOWED_CATEGORIES = new Set([
   "selfharm",
@@ -27,6 +28,7 @@ const ALLOWED_CATEGORIES = new Set([
 
 function EmergencyContent() {
   const searchParams = useSearchParams();
+  const t = useTranslations("emergency");
   const rawCategory = searchParams.get("category");
   const normalizedCategory =
     rawCategory && ALLOWED_CATEGORIES.has(rawCategory.toLowerCase())
@@ -55,12 +57,11 @@ function EmergencyContent() {
       <div className="flex items-center gap-2.5">
         <HeartHandshake className="h-6 w-6 text-[#005682] shrink-0" aria-hidden="true" />
         <h3 className="font-headline-md text-[18px] text-[#005682] font-bold">
-          If you are having thoughts of harming yourself
+          {t("redFlagSelfHarm")}
         </h3>
       </div>
       <p className="font-body-md text-body-md text-text-main leading-relaxed">
-        You are not alone. Please reach out to someone you trust or a mental health
-        helpline right now.
+        {t("mentalHealthCrisis")}
       </p>
       <div>
         <a
@@ -81,7 +82,7 @@ function EmergencyContent() {
       <div className="flex items-center gap-2">
         <Hourglass className="h-5 w-5 text-primary shrink-0" aria-hidden="true" />
         <h2 className="font-headline-md text-headline-md font-bold text-text-main">
-          While you wait for help
+          {t("whatToDoTitle")}
         </h2>
       </div>
 
@@ -94,7 +95,7 @@ function EmergencyContent() {
             1
           </span>
           <span className="text-[18px] sm:text-[20px] font-medium text-text-main leading-snug">
-            Stay calm and sit down if you can.
+            {t("step1")}
           </span>
         </li>
         <li className="flex items-start gap-4">
@@ -105,7 +106,7 @@ function EmergencyContent() {
             2
           </span>
           <span className="text-[18px] sm:text-[20px] font-medium text-text-main leading-snug">
-            Unlock your door and stay near it.
+            {t("step2")}
           </span>
         </li>
         <li className="flex items-start gap-4">
@@ -116,18 +117,7 @@ function EmergencyContent() {
             3
           </span>
           <span className="text-[18px] sm:text-[20px] font-medium text-text-main leading-snug">
-            Tell someone nearby that you need help.
-          </span>
-        </li>
-        <li className="flex items-start gap-4">
-          <span
-            className="w-7 h-7 rounded-full bg-red-100 text-urgency-red flex items-center justify-center font-bold text-caption shrink-0 select-none mt-0.5"
-            aria-hidden="true"
-          >
-            4
-          </span>
-          <span className="text-[18px] sm:text-[20px] font-medium text-text-main leading-snug">
-            Do not eat or drink anything.
+            {t("step3")}
           </span>
         </li>
       </ol>
@@ -158,11 +148,10 @@ function EmergencyContent() {
                   tabIndex={-1}
                   className="font-headline-xl-mobile sm:font-headline-xl text-headline-xl-mobile sm:text-headline-xl font-bold text-text-main tracking-tight outline-none"
                 >
-                  This may be an emergency
+                  {t("title")}
                 </h1>
                 <p className="font-body-lg text-body-lg text-text-muted max-w-lg mx-auto leading-relaxed">
-                  Based on what you described, you should get help right now. Please
-                  do not wait.
+                  {t("subtitle")}
                 </p>
               </div>
             </div>
@@ -172,22 +161,22 @@ function EmergencyContent() {
               <a
                 href="tel:112"
                 role="button"
-                className="w-full h-16 bg-urgency-red hover:bg-[#b91c1c] active:bg-[#991b1b] text-white rounded-xl flex items-center justify-center gap-3.5 px-6 shadow-md transition-colors focus:outline-none focus:ring-4 focus:ring-red-200"
+                className="w-full min-h-16 py-3 bg-urgency-red hover:bg-[#b91c1c] active:bg-[#991b1b] text-white rounded-xl flex items-center justify-center gap-3 px-4 sm:px-6 shadow-md transition-colors focus:outline-none focus:ring-4 focus:ring-red-200"
               >
-                <PhoneCall className="h-7 w-7 shrink-0 text-white" aria-hidden="true" />
-                <span className="font-headline-md text-headline-md font-bold tracking-tight text-white">
-                  Call Emergency Services: 112
+                <PhoneCall className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 text-white" aria-hidden="true" />
+                <span className="font-headline-md text-sm sm:text-base md:text-lg font-bold tracking-tight text-white text-center">
+                  {t("ambulanceNumber")}
                 </span>
               </a>
 
               <a
                 href="tel:108"
                 role="button"
-                className="w-full h-16 bg-[#991b1b] hover:bg-[#7f1d1d] active:bg-[#681818] text-white rounded-xl flex items-center justify-center gap-3.5 px-6 shadow-sm transition-colors focus:outline-none focus:ring-4 focus:ring-red-200"
+                className="w-full min-h-16 py-3 bg-[#991b1b] hover:bg-[#7f1d1d] active:bg-[#681818] text-white rounded-xl flex items-center justify-center gap-3 px-4 sm:px-6 shadow-sm transition-colors focus:outline-none focus:ring-4 focus:ring-red-200"
               >
-                <Ambulance className="h-7 w-7 shrink-0 text-white" aria-hidden="true" />
-                <span className="font-headline-md text-headline-md font-bold tracking-tight text-white">
-                  Call Ambulance: 108
+                <Ambulance className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 text-white" aria-hidden="true" />
+                <span className="font-headline-md text-sm sm:text-base md:text-lg font-bold tracking-tight text-white text-center">
+                  {t("ambulanceAlt")}
                 </span>
               </a>
             </div>
@@ -212,7 +201,7 @@ function EmergencyContent() {
                 className="inline-flex items-center gap-1.5 font-medium text-caption text-text-muted hover:text-text-main transition-colors py-1 px-3 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                <span>I&apos;m safe, return to chat</span>
+                <span>{t("backToSafety")}</span>
               </Link>
               <p className="text-caption text-text-muted">
                 SafeSteps cannot provide emergency medical care.

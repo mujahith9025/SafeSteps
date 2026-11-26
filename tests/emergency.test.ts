@@ -6,7 +6,7 @@ import {
 } from "../src/safety/emergency.test-cases";
 
 describe("SafeSteps Emergency Detection Module (Recall = 100%)", () => {
-  it("must trigger emergency for every red-flag phrase (30/30 trigger cases)", () => {
+  it(`must trigger emergency for every red-flag phrase (${emergencyTriggerPhrases.length} trigger cases)`, () => {
     let triggeredCount = 0;
     const failedPhrases: string[] = [];
 
@@ -37,7 +37,7 @@ describe("SafeSteps Emergency Detection Module (Recall = 100%)", () => {
     expect(recall).toBe(100);
   });
 
-  it("must NOT trigger emergency for benign or negated phrases (20/20 non-trigger cases)", () => {
+  it(`must NOT trigger emergency for benign or negated phrases (${emergencyNonTriggerPhrases.length} non-trigger cases)`, () => {
     let nonTriggeredCount = 0;
     const falsePositivePhrases: string[] = [];
 

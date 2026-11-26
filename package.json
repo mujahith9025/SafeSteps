@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "check-i18n": "tsx scripts/check-i18n-keys.ts",
     "ingest": "tsx scripts/ingest-kb.ts"
   },
   "dependencies": {
@@ -16,6 +17,7 @@
     "@supabase/supabase-js": "^2.119.2",
     "lucide-react": "^1.80.0",
     "next": "16.4.6",
+    "next-intl": "^4.16.2",
     "pdfkit": "^0.21.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

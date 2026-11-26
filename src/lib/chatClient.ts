@@ -25,7 +25,8 @@ export class ChatApiError extends Error {
  */
 export async function sendMessageToApi(
   messages: ApiChatMessage[],
-  conversationId?: string | null
+  conversationId?: string | null,
+  language?: string
 ): Promise<ApiResponse> {
   let response: Response;
 
@@ -38,6 +39,7 @@ export async function sendMessageToApi(
       body: JSON.stringify({
         messages,
         conversationId: conversationId || undefined,
+        language: language || undefined,
       }),
     });
   } catch {

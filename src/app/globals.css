@@ -35,9 +35,9 @@
   --color-surface-container-low: #EFF4FF;
   --color-surface-container: #E6EEFF;
 
-  /* Typography Fonts */
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-inter: var(--font-inter), system-ui, -apple-system, sans-serif;
+  /* Typography Fonts with Unicode Fallbacks */
+  --font-sans: var(--font-inter), var(--font-noto-tamil), var(--font-noto-devanagari), system-ui, -apple-system, sans-serif;
+  --font-inter: var(--font-inter), var(--font-noto-tamil), var(--font-noto-devanagari), system-ui, -apple-system, sans-serif;
 
   /* Stitch Typography Scale */
   --text-h1: 40px;

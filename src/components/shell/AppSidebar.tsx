@@ -14,6 +14,8 @@ import {
 } from 'lucide-react'
 import { Logo } from '@/components/layout/Logo'
 import { UserMenu } from './UserMenu'
+import { LanguageSwitcher } from './LanguageSwitcher'
+import { useTranslations } from 'next-intl'
 
 export interface NavItem {
   label: string
@@ -21,7 +23,11 @@ export interface NavItem {
   icon: React.ComponentType<{ className?: string }>
 }
 
-export const NAV_ITEMS: NavItem[] = [
+export const NAV_ITEMS: {
+  label: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+}[] = [
   { label: 'Chat', href: '/chat', icon: MessageSquare },
   { label: 'My reports', href: '/reports', icon: FileText },
   { label: 'Health profile', href: '/profile', icon: ShieldCheck },
@@ -49,7 +55,16 @@ export function AppSidebar({
   isCollapsed = false,
 }: AppSidebarProps) {
   const pathname = usePathname()
+  const t = useTranslations('shell')
   const drawerRef = useRef<HTMLDivElement>(null)
+
+  const navItems: NavItem[] = [
+    { label: t('navChat'), href: '/chat', icon: MessageSquare },
+    { label: t('navReports'), href: '/reports', icon: FileText },
+    { label: t('navProfile'), href: '/profile', icon: ShieldCheck },
+    { label: t('navHistory'), href: '/history', icon: Clock },
+    { label: t('navSettings'), href: '/settings', icon: Settings },
+  ]
 
   // 1. Close mobile drawer on route change
   useEffect(() => {
@@ -150,12 +165,12 @@ export function AppSidebar({
               className="w-full h-12 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors"
             >
               <Plus className="w-5 h-5" />
-              <span>New chat</span>
+              <span>{t('newChat')}</span>
             </Link>
 
             {/* Navigation Links */}
             <nav className="flex flex-col gap-1.5" aria-label="Mobile Main Navigation">
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const active = isItemActive(item.href)
                 const Icon = item.icon
                 return (
@@ -178,8 +193,14 @@ export function AppSidebar({
             </nav>
           </div>
 
-          {/* User Menu at Bottom */}
-          <div className="pt-3 border-t border-slate-100">
+          <div className="flex flex-col gap-3 pt-3 border-t border-slate-100">
+            {/* Mobile Language Switcher Row */}
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-semibold text-slate-500">{t('languageSwitcherLabel')}</span>
+              <LanguageSwitcher />
+            </div>
+
+            {/* User Menu at Bottom */}
             <UserMenu user={user} isCollapsed={false} />
           </div>
         </div>
@@ -204,12 +225,12 @@ export function AppSidebar({
           <Link
             href="/chat"
             aria-label="New chat consultation"
-            title="New chat"
+            title={t('newChat')}
             className="w-12 h-12 rounded-xl bg-teal-700 hover:bg-teal-800 text-white flex items-center justify-center shadow-sm transition-colors group relative focus:outline-none focus:ring-2 focus:ring-teal-700/30"
           >
             <Plus className="w-5 h-5" />
             <div className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-md z-50">
-              New chat
+              {t('newChat')}
             </div>
           </Link>
 
@@ -217,7 +238,7 @@ export function AppSidebar({
 
           {/* Icon-only nav */}
           <nav className="flex flex-col items-center gap-2 w-full" aria-label="Tablet Sidebar Navigation">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const active = isItemActive(item.href)
               const Icon = item.icon
               return (
@@ -272,12 +293,12 @@ export function AppSidebar({
           className="w-full h-12 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-teal-700/30"
         >
           <Plus className="w-5 h-5" />
-          <span>New chat</span>
+          <span>{t('newChat')}</span>
         </Link>
 
         {/* Navigation items */}
         <nav className="flex flex-col gap-1 mt-1" aria-label="Desktop Main Navigation">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const active = isItemActive(item.href)
             const Icon = item.icon
             return (

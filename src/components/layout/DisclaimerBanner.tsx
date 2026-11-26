@@ -1,5 +1,8 @@
+'use client'
+
 import React from "react";
 import { Info, PhoneCall } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface DisclaimerBannerProps {
   className?: string;
@@ -10,6 +13,8 @@ export function DisclaimerBanner({
   className = "",
   showEmergencyCall = true,
 }: DisclaimerBannerProps) {
+  const t = useTranslations("disclaimer");
+
   return (
     <aside
       role="note"
@@ -19,7 +24,7 @@ export function DisclaimerBanner({
       <div className="flex items-center gap-2 truncate">
         <Info className="h-4 w-4 shrink-0 text-teal-700" aria-hidden="true" />
         <span className="truncate">
-          General information only. Not a diagnosis. In an emergency call 112.
+          {t("bannerText")}
         </span>
       </div>
       {showEmergencyCall && (
@@ -29,7 +34,7 @@ export function DisclaimerBanner({
           className="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full transition-colors shrink-0"
         >
           <PhoneCall className="w-3 h-3" aria-hidden="true" />
-          <span>Call 112</span>
+          <span>{t("callEmergency")}</span>
         </a>
       )}
     </aside>
