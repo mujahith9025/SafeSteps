@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Groq AI Client for SafeSteps
  *
