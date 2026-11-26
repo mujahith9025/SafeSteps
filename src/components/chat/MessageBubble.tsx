@@ -1,7 +1,10 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import { Shield, CheckCheck, AlertTriangle, ArrowRight } from "lucide-react";
-import { UrgencyResult } from "@/types/chat";
+import { UrgencyResult, SourceCitation } from "@/types/chat";
+import { CitationChips, SourcesDrawer } from "./SourcesPanel";
 
 export interface MessageBubbleProps {
   id?: string;
@@ -11,6 +14,7 @@ export interface MessageBubbleProps {
   status?: "sent" | "delivered" | "read";
   result?: UrgencyResult;
   quickReplies?: string[];
+  sources?: SourceCitation[];
   onSelectChip?: (text: string) => void;
   isLatest?: boolean;
   disabled?: boolean;
@@ -23,10 +27,12 @@ export function MessageBubble({
   timestamp = "10:14 AM",
   result,
   quickReplies,
+  sources,
   onSelectChip,
   isLatest = false,
   disabled = false,
 }: MessageBubbleProps) {
+  const [showSources, setShowSources] = useState(false);
   if (role === "user") {
     return (
       <div className="flex flex-col items-end w-full group animate-fade-in">
@@ -136,6 +142,21 @@ export function MessageBubble({
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Clinical Citation Chips & Evidence Drawer (Matching Stitch Design) */}
+          {sources && sources.length > 0 && (
+            <div className="mt-2.5 pt-2 border-t border-border/60">
+              <CitationChips
+                sources={sources}
+                onOpenSources={() => setShowSources((prev) => !prev)}
+              />
+              <SourcesDrawer
+                sources={sources}
+                isOpen={showSources}
+                onToggle={() => setShowSources((prev) => !prev)}
+              />
             </div>
           )}
         </div>

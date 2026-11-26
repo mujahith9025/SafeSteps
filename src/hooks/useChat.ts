@@ -30,10 +30,24 @@ export type ChatErrorType = "error" | "rate_limit" | "offline" | null;
 
 export interface UseChatOptions {
   onEmergency?: (category?: string) => void;
+  onConversationCreated?: (newId: string) => void;
+  initialMessages?: Message[];
+  initialConversationId?: string | null;
+  initialTitle?: string;
 }
 
 export function useChat(options?: UseChatOptions) {
-  const [messages, setMessages] = useState<Message[]>([INITIAL_WELCOME_MESSAGE]);
+  const [messages, setMessages] = useState<Message[]>(
+    options?.initialMessages && options.initialMessages.length > 0
+      ? options.initialMessages
+      : [INITIAL_WELCOME_MESSAGE]
+  );
+  const [conversationId, setConversationId] = useState<string | null>(
+    options?.initialConversationId ?? null
+  );
+  const [title, setTitle] = useState<string>(
+    options?.initialTitle || "New health assessment"
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [errorType, setErrorType] = useState<ChatErrorType>(null);
@@ -115,7 +129,14 @@ export function useChat(options?: UseChatOptions) {
         }));
 
       try {
-        const response = await sendMessageToApi(conversationPayload);
+        const response = await sendMessageToApi(conversationPayload, conversationId);
+
+        if (response.conversationId && response.conversationId !== conversationId) {
+          setConversationId(response.conversationId);
+          if (options?.onConversationCreated) {
+            options.onConversationCreated(response.conversationId);
+          }
+        }
 
         const assistantMessage: Message = {
           id: `asst-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -125,6 +146,7 @@ export function useChat(options?: UseChatOptions) {
           type: response.type,
           result: response.result,
           quick_replies: response.quick_replies,
+          sources: response.sources || response.result?.sources,
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
@@ -139,7 +161,7 @@ export function useChat(options?: UseChatOptions) {
         setIsLoading(false);
       }
     },
-    [messages, isLoading, options]
+    [messages, isLoading, conversationId, options]
   );
 
   /**
@@ -163,7 +185,14 @@ export function useChat(options?: UseChatOptions) {
       }));
 
     try {
-      const response = await sendMessageToApi(conversationPayload);
+      const response = await sendMessageToApi(conversationPayload, conversationId);
+
+      if (response.conversationId && response.conversationId !== conversationId) {
+        setConversationId(response.conversationId);
+        if (options?.onConversationCreated) {
+          options.onConversationCreated(response.conversationId);
+        }
+      }
 
       const assistantMessage: Message = {
         id: `asst-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -172,6 +201,8 @@ export function useChat(options?: UseChatOptions) {
         timestamp: formatTime(),
         type: response.type,
         result: response.result,
+        quick_replies: response.quick_replies,
+        sources: response.sources || response.result?.sources,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -184,7 +215,7 @@ export function useChat(options?: UseChatOptions) {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, options]);
+  }, [messages, isLoading, conversationId, options]);
 
   /**
    * Reset conversation back to the initial welcome message
@@ -196,6 +227,8 @@ export function useChat(options?: UseChatOptions) {
         timestamp: formatTime(),
       },
     ]);
+    setConversationId(null);
+    setTitle("New health assessment");
     setIsLoading(false);
     setError(null);
     setErrorType(null);
@@ -211,6 +244,10 @@ export function useChat(options?: UseChatOptions) {
 
   return {
     messages,
+    conversationId,
+    title,
+    setTitle,
+    setConversationId,
     isLoading,
     error,
     errorType,

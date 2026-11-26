@@ -24,10 +24,12 @@ import {
   Printer,
   X,
 } from "lucide-react";
-import { UrgencyResult, UrgencyLevel } from "@/types/chat";
+import { UrgencyResult, UrgencyLevel, SourceCitation } from "@/types/chat";
+import { UrgencyCardSources, SourcesDrawer } from "./SourcesPanel";
 
 export interface UrgencyCardProps {
   result: UrgencyResult;
+  sources?: SourceCitation[];
   onNewChat?: () => void;
   onShowSummary?: () => void;
   onPrepareVisit?: () => void;
@@ -47,6 +49,7 @@ function getNormalizedUrgency(result: UrgencyResult): UrgencyLevel {
 
 export function UrgencyCard({
   result,
+  sources,
   onNewChat,
   onShowSummary,
   onPrepareVisit,
@@ -58,6 +61,9 @@ export function UrgencyCard({
 
   const [isCopied, setIsCopied] = useState(false);
   const [showBriefModal, setShowBriefModal] = useState(false);
+  const [showSourcesPanel, setShowSourcesPanel] = useState(false);
+
+  const activeSources = sources || result.sources || [];
 
   // Level-specific configurations matching Stitch source of truth
   const config = {
@@ -374,6 +380,21 @@ export function UrgencyCard({
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Embedded Sources Section matching Stitch Clinical Assessment */}
+          {activeSources.length > 0 && (
+            <div className="space-y-2">
+              <UrgencyCardSources
+                sources={activeSources}
+                onOpenSources={() => setShowSourcesPanel((prev) => !prev)}
+              />
+              <SourcesDrawer
+                sources={activeSources}
+                isOpen={showSourcesPanel}
+                onToggle={() => setShowSourcesPanel((prev) => !prev)}
+              />
             </div>
           )}
 

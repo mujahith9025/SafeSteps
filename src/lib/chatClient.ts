@@ -24,7 +24,8 @@ export class ChatApiError extends Error {
  * Calls the real backend route and handles question, result, and emergency responses.
  */
 export async function sendMessageToApi(
-  messages: ApiChatMessage[]
+  messages: ApiChatMessage[],
+  conversationId?: string | null
 ): Promise<ApiResponse> {
   let response: Response;
 
@@ -34,7 +35,10 @@ export async function sendMessageToApi(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({
+        messages,
+        conversationId: conversationId || undefined,
+      }),
     });
   } catch {
     // Network offline, DNS failure, or aborted connection
@@ -105,15 +109,24 @@ export async function sendMessageToApi(
 
   // Handle structured result response
   if (data.type === "result") {
+    const sources = Array.isArray(data.sources)
+      ? data.sources
+      : Array.isArray(data.result?.sources)
+      ? data.result.sources
+      : undefined;
+
     return {
       type: "result",
       content: data.content || `${data.headline}\n\n${data.suggests}`,
+      conversationId: data.conversationId,
+      sources,
       result: data.result || {
         urgency: data.urgency,
         headline: data.headline,
         suggests: data.suggests,
         actions: data.actions || [],
         warning_signs: data.warning_signs || [],
+        sources,
       },
     };
   }
@@ -126,5 +139,7 @@ export async function sendMessageToApi(
       data.content ||
       "Could you tell me a bit more about what symptoms you are experiencing?",
     quick_replies: Array.isArray(data.quick_replies) ? data.quick_replies : [],
+    sources: Array.isArray(data.sources) ? data.sources : undefined,
+    conversationId: data.conversationId,
   };
 }

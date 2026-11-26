@@ -149,12 +149,55 @@ Valid, Guardrailed Response Delivered to Browser
 
 Create `.env.local` in the project root based on `.env.example`:
 
-| Variable | Description | Required | Example / Recommended Value |
+| Variable | Description | Required | Scope / Prefix Rule |
 | :--- | :--- | :---: | :--- |
-| `GEMINI_API_KEY` | Server-side API key for Google Gemini API from Google AI Studio. | **Yes** | `<your-api-key>` |
-| `GEMINI_MODEL` | The Gemini model identifier to invoke. | **Yes** | `gemini-3.5-flash` |
+| `GROQ_API_KEY` | Server-side API key for Groq clinical triage engine. | Optional | Server-only (No prefix) |
+| `GROQ_MODEL` | Groq model identifier (`openai/gpt-oss-120b`). | Optional | Server-only (No prefix) |
+| `GEMINI_API_KEY` | Server-side API key for Google Gemini from Google AI Studio. | **Yes** | Server-only (No prefix) |
+| `GEMINI_MODEL` | Gemini model identifier (`gemini-3.5-flash`). | **Yes** | Server-only (No prefix) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project API URL. | **Yes** | Client & Server (`NEXT_PUBLIC_`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous API key (subject to RLS). | **Yes** | Client & Server (`NEXT_PUBLIC_`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (bypasses RLS). | **Yes** | **Server-only (Never prefix)** |
+| `GEMINI_EMBEDDING_MODEL` | Gemini model for vector embeddings (`text-embedding-004`). | Optional | Server-only (No prefix) |
 
-> **Security Rule:** Never prefix `GEMINI_API_KEY` with `NEXT_PUBLIC_`. The key is loaded exclusively inside server-side route handlers and is never sent to the client browser.
+> 🔒 **Security Rules:**
+> - Never prefix secret keys (`GEMINI_API_KEY`, `GROQ_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) with `NEXT_PUBLIC_`.
+> - `SUPABASE_SERVICE_ROLE_KEY` has full administrative database privileges. It is strictly guarded by `'server-only'` in `src/lib/supabase/admin.ts` and must never be exposed to browser bundles.
+> - Never commit `.env.local` or any secrets to version control.
+
+---
+
+## 🗄️ Supabase Setup
+
+### 1. Create a Supabase Project
+1. Log in to [Supabase](https://supabase.com/).
+2. Click **New Project**, choose your organization, enter a project name (e.g., `safesteps`), and select a database region close to your users.
+3. Set a strong database password and click **Create new project**.
+
+### 2. Copy the Project URL and API Keys
+1. In your Supabase project dashboard, navigate to **Project Settings** (gear icon in sidebar) -> **API**.
+2. Copy the credentials into your local `.env.local` file:
+   - **Project URL:** Copy the URL and assign it to `NEXT_PUBLIC_SUPABASE_URL`.
+   - **Project API Keys -> `anon` (public):** Copy the key and assign it to `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+   - **Project API Keys -> `service_role` (secret):** Click reveal, copy the secret key, and assign it to `SUPABASE_SERVICE_ROLE_KEY`.
+
+### 3. Understanding Which Key is Which
+- **`NEXT_PUBLIC_SUPABASE_ANON_KEY` (Anon Key):**
+  - **What it is:** The public client-side API key.
+  - **Where it is used:** In browser Client Components via `src/lib/supabase/client.ts` and authenticated Server Components / Route Handlers via `src/lib/supabase/server.ts`.
+  - **Security:** Safe for client-side inclusion because all requests are restricted by Supabase **Row Level Security (RLS)** policies.
+- **`SUPABASE_SERVICE_ROLE_KEY` (Service Role Key):**
+  - **What it is:** The root administrator secret key.
+  - **Where it is used:** Exclusively on the server via `src/lib/supabase/admin.ts` for specialized backend tasks (data ingestion, clinical guideline seeding, permanent account deletion).
+  - **Security:** **Bypasses all Row Level Security.** Must NEVER have the `NEXT_PUBLIC_` prefix, must NEVER be imported into Client Components, and must NEVER be committed to Git. Guarded by the `'server-only'` import guard.
+
+### 4. Verify Database Connectivity
+Once configured in `.env.local`, start your local server and verify the database connection:
+```bash
+# Check database health check probe
+curl http://localhost:3000/api/health/db
+# Expected response: {"status":"ok"}
+```
 
 ---
 
@@ -217,7 +260,10 @@ Safe Steps/
 │   ├── app/
 │   │   ├── api/
 │   │   │   ├── chat/route.ts   # Core backend chat endpoint (rate limit, emergency, Gemini, guardrail)
-│   │   │   └── health/route.ts # Uptime monitoring health check endpoint (GET /api/health)
+│   │   │   ├── health/
+│   │   │   │   ├── route.ts    # Application health check endpoint (GET /api/health)
+│   │   │   │   └── db/route.ts # Database connectivity health probe (GET /api/health/db)
+│   │   │   └── ...
 │   │   ├── chat/page.tsx       # Conversational symptom triage page
 │   │   ├── emergency/page.tsx  # High-acuity emergency takeover screen with 112/108 dials
 │   │   ├── error.tsx           # Global Next.js runtime error boundary
@@ -235,7 +281,11 @@ Safe Steps/
 │   ├── lib/
 │   │   ├── chatClient.ts       # Client API fetcher & custom ChatApiError mapping
 │   │   ├── gemini.ts           # Singleton Google Gen AI client & model resolver
-│   │   └── rateLimit.ts        # In-memory sliding window rate limiter (15 req/min per IP)
+│   │   ├── rateLimit.ts        # In-memory sliding window rate limiter (15 req/min per IP)
+│   │   └── supabase/           # Supabase client factory (browser, server, admin)
+│   │       ├── admin.ts        # Service role client with 'server-only' guard
+│   │       ├── client.ts       # Browser client using anon key
+│   │       └── server.ts       # Server client using cookies via @supabase/ssr
 │   ├── prompts/
 │   │   └── system.txt          # Production SafeSteps clinical system instructions
 │   ├── safety/

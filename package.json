@@ -7,10 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "ingest": "tsx scripts/ingest-kb.ts"
   },
   "dependencies": {
     "@google/genai": "^3.6.1",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.2",
     "lucide-react": "^1.80.0",
     "next": "16.4.6",
     "react": "19.3.0",
@@ -25,6 +28,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vite": "^8.3.8",
     "vitest": "^5.1.2"

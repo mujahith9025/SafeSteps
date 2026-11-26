@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useChat } from "@/hooks/useChat";
+import { Message } from "@/types/chat";
+import { renameConversationAction } from "@/app/(app)/history/actions";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
 import { ChatHeader } from "./ChatHeader";
@@ -12,15 +14,35 @@ import { ErrorBanner } from "./ErrorBanner";
 import { OfflineBanner, useOnlineStatus } from "./OfflineBanner";
 import { RateLimitNotice } from "./RateLimitNotice";
 import { EmptyChatState } from "./EmptyChatState";
-import { Shield, ShieldCheck, AlertTriangle } from "lucide-react";
+import { PersonalisationPill } from "./PersonalisationPill";
+import { Shield, ShieldCheck, AlertTriangle, Pencil, CheckCircle2 } from "lucide-react";
 
-export function ChatWindow() {
+export interface ChatWindowProps {
+  initialMessages?: Message[];
+  initialConversationId?: string | null;
+  initialTitle?: string;
+  isGuest?: boolean;
+  initialPersonalise?: boolean;
+  profileSummary?: string;
+}
+
+export function ChatWindow({
+  initialMessages,
+  initialConversationId,
+  initialTitle,
+  isGuest = false,
+  initialPersonalise = false,
+  profileSummary,
+}: ChatWindowProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isOnline = useOnlineStatus();
   const initialSymptomHandled = useRef<boolean>(false);
   const {
     messages,
+    conversationId,
+    title,
+    setTitle,
     isLoading,
     error,
     errorType,
@@ -30,14 +52,59 @@ export function ChatWindow() {
     resetChat,
     clearError,
   } = useChat({
+    initialMessages,
+    initialConversationId,
+    initialTitle,
     onEmergency: (category) => {
       const query = category ? `?category=${encodeURIComponent(category)}` : "";
       router.push(`/emergency${query}`);
     },
+    onConversationCreated: (newId) => {
+      if (typeof window !== "undefined" && !isGuest && !window.location.pathname.startsWith("/chat-guest")) {
+        window.history.replaceState({}, "", `/chat/${newId}`);
+      }
+    },
   });
 
   const [inputValue, setInputValue] = useState("");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitleValue, setEditTitleValue] = useState("");
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleStartRename = () => {
+    setEditTitleValue(title);
+    setIsEditingTitle(true);
+  };
+
+  const handleSaveRename = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = editTitleValue.trim();
+    if (!trimmed || trimmed === title || !conversationId) {
+      setIsEditingTitle(false);
+      return;
+    }
+    setIsSavingTitle(true);
+    try {
+      const res = await renameConversationAction(conversationId, trimmed);
+      if (res.success && res.title) {
+        setTitle(res.title);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setIsSavingTitle(false);
+      setIsEditingTitle(false);
+    }
+  };
+
+  const handleNewChat = () => {
+    if (conversationId) {
+      router.push("/chat");
+    } else {
+      resetChat();
+    }
+  };
 
   // Auto-trigger symptom inquiry when routed from Landing Page with ?symptom=...
   useEffect(() => {
@@ -97,7 +164,7 @@ export function ChatWindow() {
       <OfflineBanner isOffline={!isOnline || errorType === "offline"} />
 
       {/* Pinned Chat Header with 3-Step Triage Progress Tracker */}
-      <ChatHeader onNewChat={resetChat} currentStep={currentStep} />
+      <ChatHeader onNewChat={handleNewChat} sessionTitle={title} currentStep={currentStep} />
 
       {/* Main Centered Chat Container (Max 760px from Stitch) */}
       <div className="flex-1 flex flex-col w-full max-w-[760px] mx-auto min-h-0 relative">
@@ -111,11 +178,84 @@ export function ChatWindow() {
           aria-label="Health consultation messages"
           className="flex-1 overflow-y-auto px-4 py-6 space-y-6"
         >
+          {/* Header Block: Assessment Title & Cloud Auto-Save Status (Stitch Chat Updates) */}
+          {!isGuest && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-border/50">
+              <div className="flex items-center gap-2 group min-w-0">
+                {isEditingTitle ? (
+                  <form onSubmit={handleSaveRename} className="flex items-center gap-2 flex-wrap">
+                    <input
+                      type="text"
+                      value={editTitleValue}
+                      onChange={(e) => setEditTitleValue(e.target.value)}
+                      disabled={isSavingTitle}
+                      maxLength={60}
+                      className="text-base sm:text-lg font-bold text-text-main border border-teal-500 rounded-lg px-2.5 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-teal-600"
+                      autoFocus
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSavingTitle}
+                      className="text-xs bg-teal-700 hover:bg-teal-800 text-white px-2.5 py-1.5 rounded-md font-semibold transition-colors"
+                    >
+                      {isSavingTitle ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingTitle(false)}
+                      className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-md transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <h2 className="font-bold text-lg sm:text-xl text-text-main tracking-tight truncate" id="chat-title">
+                      {title}
+                    </h2>
+                    {conversationId && (
+                      <button
+                        type="button"
+                        onClick={handleStartRename}
+                        className="p-1 rounded-lg text-slate-400 hover:text-teal-700 hover:bg-slate-100 transition-colors shrink-0"
+                        title="Rename assessment"
+                        aria-label="Rename assessment"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+              {/* Auto-saved Indicator */}
+              {conversationId ? (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-50 text-teal-800 text-xs font-semibold self-start sm:self-auto border border-teal-200 shrink-0">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-teal-700" />
+                  <span>Auto-saved to my reports</span>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {/* Personalisation Info Pill (Stitch Chat Updates) */}
+          {!isGuest && (
+            <PersonalisationPill
+              initialPersonalise={initialPersonalise}
+              profileSummary={profileSummary}
+            />
+          )}
+
           {/* Security & Privacy Timestamp Pill */}
           <div className="flex justify-center select-none">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-text-muted text-caption border border-border/60">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              <span>Today, SafeSteps Triage Session &bull; Private In-Memory</span>
+              <span>
+                {isGuest
+                  ? "Today, SafeSteps Triage Session • Private In-Memory"
+                  : conversationId
+                  ? "SafeSteps Clinical Consultation • Encrypted Session"
+                  : "New Assessment • Encrypted Session"}
+              </span>
             </span>
           </div>
 
@@ -137,6 +277,7 @@ export function ChatWindow() {
                 <UrgencyCard
                   key={msg.id}
                   result={msg.result!}
+                  sources={msg.sources || msg.result?.sources}
                   onNewChat={resetChat}
                 />
               );
@@ -151,6 +292,7 @@ export function ChatWindow() {
                 content={msg.content}
                 timestamp={msg.timestamp}
                 quickReplies={msg.quick_replies}
+                sources={msg.sources}
                 onSelectChip={handleChipSelect}
                 isLatest={index === messages.length - 1}
                 disabled={isLoading || !isOnline}

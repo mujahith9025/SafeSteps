@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { DisclaimerBanner, Navbar, Footer } from "@/components/layout";
 
 const inter = Inter({
@@ -31,11 +32,15 @@ export default function RootLayout({
           Skip to main content
         </a>
         <DisclaimerBanner />
-        <Navbar />
+        <Suspense fallback={null}>
+          <Navbar />
+        </Suspense>
         <main id="main-content" className="flex-1 flex flex-col">
           {children}
         </main>
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </body>
     </html>
   );

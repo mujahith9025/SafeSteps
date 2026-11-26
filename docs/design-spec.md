@@ -584,8 +584,502 @@ Below is an exhaustive comparison between the initial written brief and the Stit
 
 ---
 
-## 6. Next Steps & Confirmation Request
+---
 
-The complete design specification is saved in [docs/design-spec.md](file:///d:/My%20Project/Safe%20Steps/docs/design-spec.md).
+## 7. Level 2 Design Specification & Implementation Blueprint
 
-Please review and confirm this specification (including the choice of emergency number **112** vs **911** and the background color **#F8FAFC**). Once you confirm, we will proceed to building the application routes and components.
+> **Level 2 Architectural Scope:** Full authenticated patient experience, secure account management, clinical health profile baseline, persistent triage consultation history, multi-stage medical report explainer with OCR extraction, doctor visit summary preview & printable consultation brief, user preferences and GDPR data management, multi-lingual localization (English, தமிழ், हिन्दी), and comprehensive system resiliency specimens.  
+> **Status:** Draft / Specification Phase *(No application code written)*.
+
+---
+
+### 7.1 Screen Inventory Table (Level 2)
+
+| Screen Name (Stitch) | Device Target | Dimensions (px) | Application Route Mapping | Purpose & Architectural Role |
+| :--- | :--- | :--- | :--- | :--- |
+| **SafeSteps - Level 2 Component Library & Style Guide** | Desktop / Master | 1280 × 4200 | Design Token Specimen | Master component library specifying form fields, button states, confirmation modals, toasts, vitals table, dropzone, language switcher, citations, and skeletons. |
+| **SafeSteps - Sign Up (Create Account)** | Desktop | 1280 × 960 | `/signup` | User onboarding with full name, email, password strength meter, confirmation matching, and mandatory health data processing consent. |
+| **SafeSteps - Sign Up Mobile** | Mobile | 390 × 1020 | `/signup` (Mobile) | Mobile-adapted registration flow with 48px touch targets, expandable medical disclaimer, and sticky 112 emergency trigger. |
+| **SafeSteps - Log In (Sign In)** | Desktop | 1280 × 900 | `/login` | Patient login interface with email/password inputs, "Keep me signed in" checkbox, password reset navigation, and 256-bit encryption trust badges. |
+| **SafeSteps - Log In Mobile** | Mobile | 390 × 960 | `/login` (Mobile) | Mobile-optimized sign in screen featuring single-column touch fields, privacy reassurance banner, and quick registration links. |
+| **SafeSteps - Log In Error States & Validation** | Desktop / State | 1280 × 1100 | `/login` (Error States) | Resilient authentication failure states: global invalid credentials banner, inline field format errors, empty input boundaries, and rate-limiting lockout banner. |
+| **SafeSteps - Forgot Password (Request Reset)** | Desktop | 1280 × 900 | `/forgot-password` | Account recovery entry point: email submission field, 60-minute link expiry notice, and return to sign in link. |
+| **SafeSteps - Check Email Confirmation** | Desktop | 1280 × 900 | `/check-email` *(or `/forgot-password/sent`)* | Immediate user feedback upon requesting reset: dynamic email confirmation, instructions notice, and 45-second resend cooldown timer. |
+| **SafeSteps - Set New Password** | Desktop | 1280 × 900 | `/reset-password` | Secure password update interface: new password field with progressive 4-segment strength meter, confirmation match check, and automatic login redirect. |
+| **SafeSteps - Privacy & Consent Onboarding** | Desktop | 1280 × 1060 | `/consent` | Clinical onboarding step: 4 structured privacy cards ("What we store", "What we never do", "Your control", "What SafeSteps is"), and mandatory legal checkboxes. |
+| **SafeSteps - Privacy & Consent Onboarding Mobile** | Mobile | 390 × 1180 | `/consent` (Mobile) | Mobile-tailored consent flow with card-based readability, explicit non-diagnostic acknowledgements, and full-width "Agree & Continue" button. |
+| **SafeSteps - Signed-in App Shell with Collapsible Sidebar** | Desktop / Layout | 1280 × 900 | App Shell / Root Layout | Global authenticated application shell: 240px expanded / 64px collapsed sidebar, user profile card, route breadcrumbs, language switcher, and emergency 112 trigger. |
+| **SafeSteps - Health Profile** | Desktop | 1280 × 1260 | `/profile` | Clinical baseline management: age, sex at birth, height, weight, language preference, allergy tags (e.g. Penicillin), chronic conditions (Asthma), regular medications, and destructive delete zone. |
+| **SafeSteps - Signed-in Chat Updates** | Desktop | 1280 × 1040 | `/chat` (Authenticated) | Enhanced triage consultation incorporating patient health profile context, red-flag monitoring pill, tap-to-answer quick replies, 3-step progress bar, and GP summary generator. |
+| **SafeSteps - Conversations History** | Desktop | 1280 × 1060 | `/history` | Consultation archive: keyword symptom search, urgency filter tabs (All, Level 3, Level 2, Level 1), chronological session cards, empty states, and clear history modal. |
+| **SafeSteps - Report Explainer: Upload Document** | Desktop | 1280 × 1060 | `/reports` | Medical document intake: drag-and-drop dropzone supporting PDF, JPG, PNG (max 10MB), feature highlights (Translations, Reference Ranges, GP Questions), and past report list. |
+| **SafeSteps - Report Explainer: Processing & Parsing** | Desktop / Pipeline | 1280 × 1040 | `/reports/processing` | Visual parsing pipeline: 4-stage stepper (Upload -> Extraction -> Plain English Translation -> GP Questions), percentage bar, and privacy enclave note. |
+| **SafeSteps - Report Explainer: Results & Plain English Breakdown** | Desktop | 1280 × 1640 | `/reports/[id]` | Comprehensive report analysis: executive summary card, interactive lab parameter table with normal/elevated/low badges, expandable clinical notes, doctor discussion questions, and PDF export. |
+| **SafeSteps - Doctor Visit Summary Preview** | Desktop | 1280 × 1240 | `/summary/[conversationId]` | Standardized clinical intake brief for doctors: patient info, reported symptoms & timeline, triage assessment with NICE/NHS citations, suggested doctor questions with checkboxes, and print/PDF triggers. |
+| **SafeSteps - Settings & Preferences** | Desktop | 1280 × 1240 | `/settings` | User configuration: personal details, JSON data archive download, consultation history purge, health profile personalization toggle, language picker, consent audit trail, and account deletion. |
+| **SafeSteps - Level 2 New States & Interactive Components** | Desktop / Resiliency | 1280 × 2800 | System Resiliency | Edge states library: 3 empty states, skeleton data hydration loaders, file upload validation errors (unsupported type, >5MB, illegible OCR), session timeout warning, and 403 access control. |
+
+---
+
+### 7.2 Level 2 Design Tokens & Reusable Component Catalog
+
+#### 1. Form Fields & Input Controls
+- **Standard Input Box:** Height 48px, 12px border radius (`rounded-md`), 1px solid `#E2E8F0` border, 16px font size with 24px line height (`body-md`). Focus state: `border-color: #0F766E` with `box-shadow: 0 0 0 3px #CCFBF1`.
+- **Floating / Stacked Labels:** 14px medium slate (`#475569`) positioned with 6px vertical spacing above input. Required fields indicated with a prominent red asterisk `*` (`#DC2626`).
+- **Password Input with Visibility Toggle:** Includes an embedded end-adornment icon button (`visibility` / `visibility_off`) with 20px SVG icon and 48px touch target.
+- **Real-Time Password Strength Meter:**
+  - 4 progressive horizontal indicator bars (25% each, 4px height, 4px rounded).
+  - Strength states: **Weak** (1 bar, `#DC2626`), **Fair** (2 bars, `#EA580C`), **Good** (3 bars, `#D97706`), **Strong** (4 bars, `#16A34A`).
+  - Validation requirement pills: `8+ chars`, `letters & numbers`, `special character` rendering green with checkmark when satisfied.
+- **Validation Error States:**
+  - Container border turns solid 1.5px `#DC2626`.
+  - Background tints to subtle `#FEF2F2`.
+  - Helper message appears below with `error` icon in 14px `#DC2626`.
+
+#### 2. Clinical Data Table (Lab Parameters)
+- **Container:** Elevated white surface card (`#FFFFFF`) with 1px border (`#E2E8F0`) and 12px border radius.
+- **Table Headers (`<th>`):** 14px semibold slate (`#475569`), uppercase tracking `0.05em`, light background (`#F8FAFC`), 12px vertical and 16px horizontal padding.
+- **Table Rows (`<tr>`):** 16px regular text (`#0F172A`), alternating subtle zebra striping, smooth hover highlight (`#F1F5F9`).
+- **Interactive Accordion Details:** Clicking any row expands an inline panel revealing:
+  - *What this test measures* (Plain English summary).
+  - *Standard reference ranges* with demographic baseline.
+  - *Clinical insight & doctor guidance*.
+- **Mobile Responsive Transformation:** On viewports < 768px, the table collapses gracefully into stacked, touch-friendly parameter cards with prominent status chips.
+
+#### 3. Status Chips & Urgency Indicators
+- **Normal / In Range:** Text & Icon `#16A34A`, Background `#DCFCE7`, Border `#86EFAC`.
+- **Elevated / High:** Text & Icon `#D97706`, Background `#FEF3C7`, Border `#FDE68A`.
+- **Low / Below Range:** Text & Icon `#0284C7`, Background `#E0F2FE`, Border `#BAE6FD`.
+- **Critical / Out of Range:** Text & Icon `#DC2626`, Background `#FEE2E2`, Border `#FCA5A5`.
+- **Triage Badges:**
+  - `Level 1: Self-Care` (Green pill)
+  - `Level 2: See Doctor Soon` (Amber pill)
+  - `Level 3: Emergency Care` (Red pill with pulsating beacon)
+- **Tag Attributes:** 8px horizontal padding, 4px vertical padding, 9999px pill border radius, 13px font size with 600 weight.
+
+#### 4. Modals & Dialog Overlays
+- **Backdrop:** `rgba(15, 23, 42, 0.6)` with `backdrop-filter: blur(4px)`.
+- **Dialog Surface:** Centered elevated card, max width 480px, 16px border radius, 24px inner padding, accessible focus trap and Escape key listener.
+- **Dialog Variants:**
+  - *Clear Conversation History Modal:* Title "Clear Conversation History?", warning text, secondary "Keep history" button, primary destructive "Yes, clear history" button (`#DC2626`).
+  - *Delete Account Modal:* Irreversible warning banner, requires typing "DELETE" to confirm, primary destructive "Delete account permanently" action.
+  - *Edit Measured Lab Value Modal:* Allows manual numeric correction of misread OCR lab numbers with value field and unit selector.
+  - *Sign Out Modal:* Clean confirmation dialog preventing accidental session dismissal.
+
+#### 5. Toast Notifications & System Alerts
+- **Positioning:** Fixed top-right (desktop) / top-center (mobile) with z-index 9999, 12px margins, entrance slide-down animation.
+- **Success Toast:** Icon `check_circle`, border `#86EFAC`, background `#F0FDF4`, text `#15803D`. e.g., *"Profile updated successfully"*, *"Link copied to clipboard"*.
+- **Error Toast:** Icon `error`, border `#FCA5A5`, background `#FEF2F2`, text `#B91C1C`. e.g., *"Unable to save your changes"*.
+- **Warning Toast:** Icon `warning`, border `#FDE68A`, background `#FFFBEB`, text `#B45309`. e.g., *"Session will expire in 5 minutes"*.
+- **Auto-dismiss:** Automatically slides out after 4000ms with manual close button.
+
+#### 6. Drag-and-Drop Document Dropzone
+- **Idle State:** 2px dashed border (`#CBD5E1`), background `#F8FAFC`, centered cloud upload icon (`#0F766E`), heading "Drag and drop your medical report here", subtitle with file constraints (PDF, JPG, PNG up to 10MB), and secondary "Browse files" button.
+- **Drag-Over State:** Border turns solid 2px `#0F766E`, background shifts to soft teal wash `#F0FDFA`, scale transforms `scale(1.01)`.
+- **Upload Progress State:** Displays file name, file size (MB), animated indeterminate / progress bar (0% to 100%), and cancel button.
+- **Success Preview Card:** Shows file thumbnail icon, file name, upload timestamp, green `check_circle` "Ready to analyze", and "Remove / Replace" action.
+- **Error States:** Distinct red warning states for unsupported format (e.g. DOCX), oversized file (>10MB), or unreadable OCR document.
+
+#### 7. Tabs & Filter Navigation
+- **History Tabs:** Horizontal pills with active indicator: `All Consultations`, `Urgent (Level 3)`, `Doctor Review (Level 2)`, `Self-Care (Level 1)`.
+- **Settings Tabs:** Segmented navigation: `Account`, `Privacy & Data`, `Health Personalisation`, `Consent Records`.
+- **Report Breakdown Tabs:** `Plain English Summary`, `Biomarker Table`, `Doctor Questions`.
+- **Tokens:** Active tab has solid primary fill (`#0F766E`) or primary underline (2px `#0F766E`) with bold text; inactive tabs use muted slate (`#475569`).
+
+#### 8. Multi-Language Switcher
+- **Supported Locales:**
+  - **English (US / UK):** Default interface language.
+  - **Tamil (தமிழ்):** Native script translations for symptom guidance, emergency alerts, and questions.
+  - **Hindi (हिन्दी):** Devanagari script translations for triage outcomes and navigation.
+- **Component Style:** Header dropdown button displaying language globe icon (`translate`), current language label, and chevron. Dropdown menu lists native language names in their respective scripts.
+
+#### 9. Clinical Citation Chips
+- **Purpose:** Provide transparent evidence base for recommendations, fulfilling NHS DCB0129 clinical safety principles.
+- **Visual Token:** Compact pill with `menu_book` or `verified` icon, 12px font size, subtle slate border (`#E2E8F0`), soft background (`#F1F5F9`), text `#0F766E`.
+- **Instances:**
+  - `NICE Guideline CG191 (Pneumonia in adults)`
+  - `NHS Pathways v31 Clinical Triage`
+  - `NHS DCB0129 Clinical Safety Aligned`
+  - `PubMed / BMJ Best Practice Reference`
+- **Interaction:** Hover/click displays an accessible tooltip or modal with guideline summary and official external source link.
+
+#### 10. Collapsible Navigation Sidebar (App Shell)
+- **Dimensions:** Expanded width **240px**; Collapsed icon-rail width **64px**; Smooth 200ms cubic-bezier transition.
+- **Header:** SafeSteps brand icon + wordmark, accompanied by sidebar collapse toggle button (`menu_open` / `menu`).
+- **Primary CTA:** `+ New chat` full-width button (44px height, teal fill `#0F766E`, white text). In collapsed mode, shrinks to circle button with `+` icon.
+- **Navigation Links:**
+  - `Chat` (`chat_bubble` icon, route: `/chat`, shows active teal left border indicator).
+  - `My reports` (`description` icon, route: `/reports`, shows numerical count badge e.g. "2").
+  - `Health profile` (`verified_user` icon, route: `/profile`).
+  - `History` (`history` icon, route: `/history`).
+  - `Settings` (`settings` icon, route: `/settings`).
+- **User Profile Footer:**
+  - User avatar circle with patient initials (`AP`), patient name (**Ananya Patel**), and email address (**ananya.patel@healthnet.nhs.uk**).
+  - Quick menu trigger offering "View Profile" and "Sign out".
+- **Mobile Drawer:** On mobile viewports (< 1024px), collapses off-canvas and opens via header hamburger icon with backdrop dimming.
+
+#### 11. Skeleton Loaders & Perceptual Loading
+- **Animation:** Continuous subtle shimmer gradient (`linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%)`, 1.5s infinite pulse).
+- **Primitives:** Text line skeletons (heights 16px, 20px, 28px with `rounded-md`), avatar circle skeleton (40px `rounded-full`), card skeleton containers, and table row skeletons.
+
+---
+
+### 7.3 Exact Copy Inventory for Every Level 2 Screen
+
+#### Screen 9: SafeSteps - Sign Up (Create Account) (`/signup`)
+- **Top Disclaimer Banner:** `General information only. Not a diagnosis. In an emergency call 112.` | Button: `Call 112`
+- **Brand Wordmark:** `SafeSteps Health Guidance Assistant`
+- **Card Heading:** `Create your SafeSteps account`
+- **Card Subtitle:** `Join SafeSteps for calm, guided triage and personalized care tracking.`
+- **Field 1:** Label: `Full name *` | Placeholder: `e.g. Ananya Patel`
+- **Field 2:** Label: `Email address *` | Placeholder: `name@example.com`
+- **Field 3:** Label: `Password *` | Visibility toggle: `visibility` | Strength label: `Strong password` | Status pills: `8+ characters`, `letters & numbers`, `special character`
+- **Field 4:** Label: `Confirm password *` | Visibility toggle: `visibility` | Match indicator: `Passwords match`
+- **Checkbox:** `I agree to SafeSteps Terms of Service and Privacy Policy, including processing my health-related information as described.`
+- **Primary Button:** `Create account arrow_forward`
+- **Footer Text:** `Already have an account? Sign in`
+- **Trust Badge:** `verified_user We never share your health information. All data encrypted end-to-end.`
+
+#### Screen 10: SafeSteps - Sign Up Mobile (`/signup` - Mobile)
+- **Header:** Brand Logo | Disclaimer trigger: `info General information only. Not a diagnosis. In an emergency call 112. expand_more`
+- **Expandable Note:** `SafeSteps provides supportive health guidance and does not replace professional medical evaluation. Always contact local emergency services if symptoms are severe or rapidly worsening.`
+- **Hero Badge:** `verified_user Private & secure`
+- **Heading:** `Create your SafeSteps account`
+- **Subtitle:** `We never share your personal health details. Sign up for calm, structured guidance.`
+- **Inputs:** Same fields as desktop optimized for touch targets (48px input height, 16px font to prevent iOS auto-zoom).
+- **Button:** `Create account arrow_forward`
+- **Bottom Link:** `Already registered? Sign in`
+
+#### Screen 11: SafeSteps - Log In (Sign In) (`/login`)
+- **Top Disclaimer Banner:** `General information only. Not a diagnosis. In an emergency call 112.` | Button: `Call 112`
+- **Heading:** `Welcome back`
+- **Subtitle:** `Sign in to access your previous symptom assessments and care summaries.`
+- **Field 1:** Label: `Email address` | Placeholder: `name@example.com`
+- **Field 2:** Label: `Password` | Right link: `Forgot password?`
+- **Row:** Checkbox: `Keep me signed in on this device`
+- **Primary Button:** `Log in arrow_forward`
+- **Footer Text:** `Don't have an account? Create one`
+- **Trust Note:** `lock We never share your health information. 256-bit clinical encryption.`
+
+#### Screen 12: SafeSteps - Log In Mobile (`/login` - Mobile)
+- **Top Bar:** Brand Wordmark | Emergency trigger `call 112`
+- **Badge:** `verified_user Welcome back`
+- **Heading:** `Sign in to access your health profile and history`
+- **Inputs:** `Email address`, `Password`
+- **Options:** `Keep me signed in`, `Forgot password?`
+- **Action Button:** `Sign In arrow_forward`
+- **Alternative:** `New to SafeSteps? Create account`
+
+#### Screen 13: SafeSteps - Log In Error States & Validation (`/login` - Errors)
+- **Global Error Banner:**
+  - Icon: `error`
+  - Title: `Email or password is incorrect`
+  - Body: `Please double-check your credentials and try again.`
+  - Action: `close`
+- **Field Format Error:**
+  - Field: `Email address *`
+  - Error: `Invalid format e.g. name@example.com`
+- **Field Required Error:**
+  - Field: `Password *`
+  - Error: `Password is required`
+- **Rate Limit Lockout Banner:**
+  - Icon: `lock_clock`
+  - Title: `Taking a quick breather`
+  - Body: `Too many unsuccessful login attempts. For security, please wait 60 seconds before trying again.`
+
+#### Screen 14: SafeSteps - Forgot Password (Request Reset) (`/forgot-password`)
+- **Icon:** `lock_reset`
+- **Heading:** `Reset your password`
+- **Subtitle:** `Enter the email associated with your account, and we’ll send you a secure link to reset your password.`
+- **Field:** Label: `Email address` | Placeholder: `ananya.patel@healthnet.nhs.uk`
+- **Primary Button:** `Send reset link arrow_forward`
+- **Back Navigation:** `arrow_back Back to log in`
+- **Helper Note:** `The link expires after 60 minutes for your security.`
+
+#### Screen 15: SafeSteps - Check Email Confirmation (`/check-email`)
+- **Icon Badge:** `mark_email_unread` with green checkmark
+- **Heading:** `Check your email`
+- **Subtitle:** `We've sent a reset link to your email`
+- **Body:** `We sent a password reset link to ananya.patel@healthnet.nhs.uk. Click the link inside the email to set a new password. The link will expire in 60 minutes.`
+- **Secondary Action:** `Resend email (wait 45s)` / `Resend reset email`
+- **Return Action:** `Back to login`
+
+#### Screen 16: SafeSteps - Set New Password (`/reset-password`)
+- **Icon:** `lock_reset`
+- **Heading:** `Set new password`
+- **Subtitle:** `Your new password must be different from previously used passwords for security.`
+- **Field 1:** Label: `New password` | Placeholder: `Enter new password` | Visibility toggle: `visibility` | Strength: `Strength: Strong` | Status checklist: `check_circle 8+ chars, letters & numbers`
+- **Field 2:** Label: `Confirm new password` | Placeholder: `Re-enter new password` | Visibility toggle: `visibility`
+- **Primary Button:** `Update password and log in arrow_forward`
+- **Success Notice:** `check_circle Password updated successfully. Redirecting to your dashboard...`
+
+#### Screen 17: SafeSteps - Privacy & Consent Onboarding (`/consent`)
+- **Step Pill:** `Step 1 of 2`
+- **Heading:** `Your privacy matters`
+- **Subtitle:** `Here is how SafeSteps handles your health information with care.`
+- **Security Notice:** `verified_user Your data is encrypted end-to-end. We maintain clinical-grade safeguards that put your safety and autonomy first.`
+- **Card 1 (What we store):** Heading: `What we store` | Body: `Your profile, past consultation summaries, and uploaded lab documents are securely stored in encrypted vaults so you can reference them across sessions.`
+- **Card 2 (What we never do):** Heading: `What we never do` | Body: `We never sell your data, use your private medical details to train public AI models, or share information with insurance companies or employers.`
+- **Card 3 (Your control):** Heading: `Your control` | Body: `You can download your entire medical record archive, purge consultation history, or permanently delete your account anytime in Settings.`
+- **Card 4 (What SafeSteps is):** Heading: `What SafeSteps is` | Body: `A non-diagnostic guidance assistant. SafeSteps provides supportive clinical triaging and educational explanations. It does not replace emergency medical services or doctors.`
+- **Consent Checks:**
+  - `[x] I understand SafeSteps provides general health information and cannot diagnose or prescribe (Mandatory).`
+  - `[x] I consent to the processing of my health data to receive personalized triage assessments (Mandatory).`
+  - `[ ] I agree to share anonymized interaction logs to help improve triage safety (Optional).`
+- **Buttons:** `Agree & Continue arrow_forward` | `Decline & Exit`
+
+#### Screen 18: SafeSteps - Privacy & Consent Onboarding Mobile (`/consent` - Mobile)
+- **Top Badge:** `verified_user Quick setup`
+- **Heading:** `Your privacy & consent`
+- **Subtitle:** `Before we begin, please review how SafeSteps safeguards your private health details.`
+- **Mobile Cards:** Compact presentation of the 4 principles with easy-to-tap checkboxes (min 44px hit target).
+- **Bottom Dock:** Sticky "Agree & Continue" button with reassuring subtext: `You can change your consent preferences anytime in Settings.`
+
+#### Screen 19: SafeSteps - Signed-in App Shell with Collapsible Sidebar (Global Layout)
+- **Persistent Top Disclaimer:** `info General information only. Not a diagnosis. In an emergency call 112.` | Button: `Emergency 112`
+- **Top Navigation Bar:**
+  - Breadcrumbs: `SafeSteps Portal / Care Navigation`
+  - Language Picker: `translate English (US) expand_more` (Options: English, தமிழ், हिन्दी)
+  - Emergency Trigger: `call 112 Emergency Help`
+- **Collapsible Sidebar:**
+  - Brand Header: SafeSteps Logo + `menu_open` collapse button
+  - CTA Button: `add New chat`
+  - Menu Item 1: `chat_bubble Chat` (Active pill)
+  - Menu Item 2: `description My reports` (Badge: `2`)
+  - Menu Item 3: `verified_user Health profile`
+  - Menu Item 4: `history History`
+  - Menu Item 5: `settings Settings`
+  - User Card: Avatar `AP` | Name: `Ananya Patel` | Email: `ananya.patel@healthnet.nhs.uk` | Trigger: `expand_more` (Menu: "View profile", "Sign out")
+
+#### Screen 20: SafeSteps - Health Profile (`/profile`)
+- **Breadcrumb:** `SafeSteps Portal / Health profile`
+- **Heading:** `Health profile`
+- **Subtitle:** `Help SafeSteps tailor symptom guidance by keeping your personal background, allergies, and regular medications up to date.`
+- **Section 1: Basics**
+  - `Age`: 32
+  - `Sex at birth`: Female
+  - `Height`: 165 cm
+  - `Weight`: 62 kg
+  - `Preferred consultation language`: English (Dropdown: English, தமிழ், हिन्दी)
+- **Section 2: Allergies**
+  - Section note: `Medications or foods that cause adverse reactions.`
+  - Existing Tag 1: `warning Penicillin (Severe - hives / wheeze)`
+  - Existing Tag 2: `Peanuts (Mild)`
+  - Action: `+ Add allergy`
+- **Section 3: Health conditions**
+  - Section note: `Pre-existing or long-term chronic conditions.`
+  - Existing Tag: `Asthma (mild intermittent)`
+  - Action: `+ Add health condition`
+- **Section 4: Current medicines**
+  - Section note: `Regular prescriptions or over-the-counter drugs.`
+  - Card 1: `Salbutamol inhaler` — `100mcg PRN (as needed)`
+  - Card 2: `Cetirizine` — `10mg daily`
+  - Action: `+ Add medicine`
+- **Section 5: Preferences**
+  - `Consultation tone`: Calm & Detailed (Radio options: Calm & Detailed, Quick & Direct)
+  - `Measurement units`: Metric (kg, cm, °C) / Imperial (lbs, ft, °F)
+- **Section 6: Destructive Zone**
+  - Title: `Delete my health profile`
+  - Warning: `Permanently erases all clinical baseline data from SafeSteps servers.`
+  - Button: `Delete profile`
+
+#### Screen 21: SafeSteps - Signed-in Chat Updates (`/chat` - Authenticated)
+- **Active Context Banner:** `verified_user Profile Active: Ananya Patel (Age 32 • Asthma • Penicillin Allergy)`
+- **Red Flag Monitor:** `security Red-Flag Monitoring Active • End-to-End Encrypted #SF-84920`
+- **AI Response Integration Example:**
+  - AI Message: `"Hello Ananya. I see in your health profile that you have a history of mild intermittent asthma. Given your report of fever and new dry cough, does your chest tightness feel like your usual asthma symptoms, or is it different this time?"`
+- **Interactive Quick-Reply Chips:**
+  - `"Feels like asthma"`
+  - `"Different / tighter"`
+  - `"No wheezing"`
+  - `"Short of breath walking"`
+- **Progress Tracker:** `1. Reported Symptoms (Done) -> 2. Clinical Questions (Active) -> 3. Care Next Step`
+- **Post-Triage Action Dock:**
+  - `assignment_turned_in View Doctor Visit Summary` (Navigates to `/summary/[conversationId]`)
+  - `download Download PDF Brief`
+  - `bookmark Save to My Reports`
+
+#### Screen 22: SafeSteps - Conversations History (`/history`)
+- **Breadcrumb:** `SafeSteps Portal / History`
+- **Heading:** `Your conversations`
+- **Subtitle:** `Review your previous symptom assessments, advice summaries, and GP visit briefs.`
+- **Controls Bar:**
+  - Search Input: `search Search conversations by symptom...`
+  - Filter Tabs: `All`, `Urgent (Level 3)`, `Doctor Review (Level 2)`, `Self-Care (Level 1)`
+  - Secondary Action: `delete_outline Clear history` (Opens confirmation modal)
+- **History Cards:**
+  - **Item 1:** Title: `Fever & Chills Assessment` | Date: `24 October 2024, 19:47` | Badge: `Level 2: Consult Doctor` (Amber) | Excerpt: `3-day persistent fever (38.6°C) and new dry cough with mild chest tightness. Advised GP review within 24–48 hours.` | Actions: `View Summary` | `Download PDF`
+  - **Item 2:** Title: `Dull Tension Headache` | Date: `12 October 2024, 14:15` | Badge: `Level 1: Self-Care` (Green) | Excerpt: `Frontal headache following screen exposure. Recommended hydration, rest, and dim environment.` | Actions: `View Summary`
+- **Pagination:** `Showing 1–2 of 2 conversations`
+
+#### Screen 23: SafeSteps - Report Explainer: Upload Document (`/reports`)
+- **Breadcrumb:** `SafeSteps Portal / My reports`
+- **Heading:** `Medical Report Explainer`
+- **Subtitle:** `Upload your lab results or clinical letters to get clear, plain-English explanations without confusing medical jargon.`
+- **Pillars:**
+  - `description Plain-English Translations` — `Translates complex pathology metrics into simple, understandable terms.`
+  - `tune Reference Range Context` — `Visualizes whether your biomarkers fall in normal, low, or high clinical ranges.`
+  - `quiz Doctor Discussion Questions` — `Prepares targeted, intelligent questions to ask your GP at your next visit.`
+- **Dropzone Area:**
+  - Icon: `cloud_upload`
+  - Primary Text: `Drag and drop your medical report here`
+  - Subtext: `Supports PDF, JPG, PNG up to 10MB (blood tests, pathology, radiology summaries).`
+  - Button: `Browse files`
+  - Compliance Note: `lock Your files are encrypted and processed securely in compliance with UK GDPR / HIPAA principles.`
+- **Previous Reports Section:**
+  - Heading: `Previous reports`
+  - Card 1: `Complete Blood Count (CBC) & Iron Panel` — `Uploaded 22 Oct 2024 • Status: Ready` — Button: `View Breakdown`
+  - Card 2: `Comprehensive Metabolic Panel (CMP)` — `Uploaded 10 Sep 2024 • Status: Ready` — Button: `View Breakdown`
+
+#### Screen 24: SafeSteps - Report Explainer: Processing & Parsing (`/reports/processing`)
+- **Heading:** `Analyzing your document...`
+- **Subtitle:** `SafeSteps is extracting lab parameters, evaluating clinical reference ranges, and generating clear explanations.`
+- **Stepper Timeline:**
+  - Step 1: `check_circle Uploading document` — `Completed`
+  - Step 2: `check_circle Extracting lab values & test metrics` — `Completed (14 parameters found)`
+  - Step 3: `sync Translating medical jargon to plain English` — `In progress...`
+  - Step 4: `radio_button_unchecked Preparing GP discussion questions` — `Pending`
+- **Progress Bar:** `75% Complete` (Animated teal fill)
+- **Security Callout:** `security Strict privacy safeguards active: Document processed in an ephemeral memory enclave. Files are never used for public AI model training.`
+- **Timing Note:** `Usually takes 10–15 seconds. Please do not close this window.`
+
+#### Screen 25: SafeSteps - Report Explainer: Results & Plain English Breakdown (`/reports/[id]`)
+- **Breadcrumb:** `My reports / Complete Blood Count (CBC) & Iron Panel`
+- **Document Header:**
+  - Title: `Complete Blood Count (CBC) & Iron Panel`
+  - Metadata: `Analyzed on 24 Oct 2024 • Source: Quest Diagnostics / NHS Lab`
+  - Actions: `print Print` | `download Download PDF` | `edit_note Edit values (Correct misread numbers)`
+- **Executive Card ("At a glance"):**
+  - Badge: `Overall Status: 1 Value Outside Standard Range`
+  - Text: `Your test results show a slightly elevated white blood cell count (WBC), which is common when your body is fighting off a mild viral or bacterial infection. Your hemoglobin, platelet count, and red blood cells are all in optimal healthy ranges.`
+- **Interactive Lab Results Table:**
+  - Header Columns: `Parameter`, `Your Result`, `Reference Range`, `Status`, `Clinical Context`
+  - Row 1: `White Blood Cells (WBC)` | `11.8 x10^9/L` | `4.0 - 11.0 x10^9/L` | Status: `Elevated` (Amber) | Context: `Slightly elevated. Indicates active immune response (e.g. fever/infection).`
+  - Row 2: `Hemoglobin (Hb)` | `13.5 g/dL` | `12.0 - 15.5 g/dL` | Status: `Normal` (Green) | Context: `Optimal oxygen delivery capacity in blood.`
+  - Row 3: `Platelet Count` | `240 x10^9/L` | `150 - 450 x10^9/L` | Status: `Normal` (Green) | Context: `Normal clotting ability.`
+  - Row 4: `Serum Ferritin (Iron)` | `48 ng/mL` | `20 - 200 ng/mL` | Status: `Normal` (Green) | Context: `Healthy iron stores.`
+- **Section: "Questions for Your Doctor":**
+  - Q1: `"Could my slightly elevated WBC count be related to my recent 3-day fever and cough?"`
+  - Q2: `"Do I need any follow-up blood tests in a few weeks to ensure levels have normalized?"`
+- **Regulatory Disclaimer:** `Medical report analysis is for educational purposes only. Never adjust medication dosages or diagnose conditions without a doctor.`
+
+#### Screen 26: SafeSteps - Doctor Visit Summary Preview (`/summary/[conversationId]`)
+- **Breadcrumb:** `Consultations / Fever & Chills Assessment / Visit Summary Preview`
+- **Action Bar:** `arrow_back Back to chat` | `content_copy Copy link` | `print Print summary` | `download Download PDF`
+- **Clinical Banner:**
+  - Icon: `assignment_turned_in`
+  - Title: `Prepared for medical consultation`
+  - Subtitle: `This printable summary is structured to take directly to your GP appointment, show to an out-of-hours triage nurse, or upload to your surgery's online consultation service (eConsult / Patchs / Accurx).`
+  - Verification Badge: `verified SafeSteps Patient Health Record Intake • Verification #SF-84920 • Reference: SS-UK-9021`
+- **Document Content:**
+  - **Header:** `Visit summary for your doctor` | `Consultation ID: #SF-84920` | `Date: 24 October 2024, 19:47 BST`
+  - **Patient Card:**
+    - Full Name: `Ananya Patel` | Age: `32` | Sex at birth: `Female` | NHS ID: `SS-8492-UK`
+    - Known Allergies (Critical): `Penicillin, Peanuts` (Note: No reported reactions to paracetamol)
+    - Pre-existing Conditions: `Asthma (mild intermittent)`
+    - Current Regular Medicines: `Salbutamol inhaler (100mcg PRN)`, `Cetirizine (10mg daily)`
+  - **1. What I told SafeSteps (Symptoms & Timeline):**
+    - Primary Presentation: `38.6°C (101.5°F)` | `Fever duration: 3 consecutive days` (Recorded with digital oral thermometer)
+    - Associated Symptoms: `Moderate evening chills & rigors`, `Generalised lethargy and fatigue`, `Mild sensation of chest tightness`
+    - New Onset: `Dry, non-productive cough emerging on evening of Day 3`, `No hemoptysis (coughing blood)`
+    - Progression: `Tuesday Eve: Fever chills began` -> `Thursday (Today): Peak temp & new dry cough`
+  - **2. Questions SafeSteps Asked & Patient Responses:**
+    - Q: `Any shortness of breath or wheezing?` -> R: `Mild chest tightness during coughing bouts, no audible wheezing.`
+    - Q: `Any neck stiffness, light sensitivity, or confusion?` -> R: `None.`
+  - **3. SafeSteps Guidance & Triage Assessment:**
+    - Urgency Result: `Level 2: See a Doctor Soon (Within 24 to 48 Hours)`
+    - Clinical Rationale: `Persistent fever exceeding 72 hours coupled with new lower-airway cough in a patient with underlying asthma warrants clinical chest examination and lung auscultation.`
+    - Benchmarks Cited: `NICE Guideline CG191 (Pneumonia in adults) • NHS Pathways v31`
+  - **4. Suggested Questions for Your Consultation:**
+    - [ ] `1. Could this prolonged fever and new cough indicate a secondary chest infection that requires prescription treatment?`
+    - [ ] `2. Should I adjust my asthma management plan or peak flow monitoring frequency while recovering?`
+    - [ ] `3. What specific worsening symptoms should prompt me to go straight to Urgent Care or A&E rather than waiting?`
+- **Clinical Footer:** `Patient-authorized consultation intake • NHS DCB0129 Clinical Safety Aligned • 256-bit Encrypted • UK GDPR Compliant`
+
+#### Screen 27: SafeSteps - Settings & Preferences (`/settings`)
+- **Breadcrumb:** `SafeSteps Portal / Settings`
+- **Heading:** `Settings`
+- **Subtitle:** `Manage your SafeSteps account, privacy choices, clinical preferences, and personal data records.`
+- **Section 1: Account details**
+  - Name: `Ananya Patel`
+  - Email: `ananya.patel@healthnet.nhs.uk`
+  - Password: `••••••••••••` | Button: `Change password`
+- **Section 2: Privacy and data management**
+  - `Download my data archive` — `Export all past consultation records, lab reports, and profile metadata in machine-readable JSON format.` | Button: `Download JSON Archive`
+  - `Clear consultation history` — `Erase all previous chat conversations and triage records while keeping your health profile.` | Button: `Clear all history` (Destructive)
+- **Section 3: Health profile personalisation**
+  - Toggle: `Include health profile in symptom triage` (Enabled) — `Allows SafeSteps to consider known allergies and conditions during chat triage.`
+  - Preferred language: `English (US) / தமிழ் / हिन्दी`
+- **Section 4: Consent record**
+  - `Terms of Service`: `Accepted on 20 Oct 2024`
+  - `Health Data Processing`: `Active (Revocable)`
+  - `Anonymous Telemetry`: `Disabled`
+- **Section 5: Delete account**
+  - Warning Card: `Irreversible action. Permanently deletes your SafeSteps account, all consultation records, lab reports, and profile details.`
+  - Button: `Delete account permanently` (Opens confirmation modal)
+
+#### Screen 28: SafeSteps - Level 2 New States & Interactive Components (Resiliency Specimen)
+- **Section 1: Empty States**
+  - Empty History: Icon `chat_bubble_outline` | Heading: `No conversations yet` | Body: `When you complete a symptom consultation, it will appear here for your records.` | Button: `Start a consultation`
+  - Empty Reports: Icon `upload_file` | Heading: `No reports uploaded yet` | Body: `Upload a blood test or medical report to receive a clear plain-English explanation.` | Button: `Upload document`
+  - Incomplete Profile: Icon `person_add` | Heading: `Help SafeSteps tailor care` | Body: `Adding your baseline health conditions and allergies helps improve triage accuracy.` | Button: `Complete profile`
+- **Section 2: Skeleton Loaders & Data Hydration**
+  - Shimmer placeholders for history cards, report table rows, and profile input controls during network fetch.
+- **Section 3: Upload Validation & Document Quality Errors**
+  - Error 1: Icon `attachment` | Title: `This file type isn't supported` | Subtitle: `Please upload a PDF, JPG, or PNG document.`
+  - Error 2: Icon `sd_card_alert` | Title: `File is larger than 10 MB` | Subtitle: `Please compress your document or select a smaller file.`
+  - Error 3: Icon `visibility_off` | Title: `We couldn't read this clearly` | Subtitle: `The text in this image is too blurry for reliable OCR extraction. Please upload a sharper photo.`
+- **Section 4: Toasts & Session Continuity**
+  - Error Toast: `Unable to save your changes. Please check your network connection.`
+  - Session Expiry Modal / Banner: `For your privacy, your session has expired. Please sign in again to continue.`
+- **Section 5: Supportive Access Control (403 Unauthorized)**
+  - Icon: `lock`
+  - Title: `You don't have access to this page`
+  - Body: `This medical report or consultation summary belongs to another authenticated account or session has timed out.`
+  - Button: `Back to dashboard`
+
+---
+
+### 7.4 Differences Noticed Between Stitch and Written Descriptions
+
+| Feature / Dimension | Written Level 2 Brief | Stitch Design Implementation | Observed Discrepancy & Technical Impact | Architectural Decision |
+| :--- | :--- | :--- | :--- | :--- |
+| **Password Recovery Flow** | Simple request & reset routes (`/forgot-password`, `/reset-password`). | Dedicated 3-step sequence: `/forgot-password` -> `/check-email` (with countdown & email masking) -> `/reset-password`. | Provides clearer user reassurance and prevents spam resends. | Implement `/check-email` as an explicit view or state within the password recovery workflow. |
+| **Report Explainer Workflow** | Mentioned as `/reports` and `/reports/[id]`. | Stitch includes 3 distinct screen workflows: `/reports` (Upload & Past list), `/reports/processing` (Live 4-step OCR parsing pipeline), and `/reports/[id]` (Results & Table). | Adds visual feedback during OCR and prevents user drop-off while parsing. | Implement `/reports/processing` as a real-time progress state between upload and results. |
+| **Authentication Error States** | Implicit validation errors on `/login`. | Stitch provides a dedicated comprehensive screen showing global alerts, inline format errors, and rate-limiting lockout cooldowns. | Demonstrates resilient UX boundaries against brute force. | Implement both global alert banner and field-level inline error messages. |
+| **Mobile Variations** | Generic responsive behavior implied. | Stitch provides 4 dedicated mobile screens: `/signup` (Mobile), `/login` (Mobile), `/consent` (Mobile), and Mobile App Drawer. | Mobile layouts feature stacked inputs, sticky emergency bars, and enlarged 48px hit areas. | Implement dedicated responsive layouts with Tailwind breakpoint classes (`md:hidden`, `block`). |
+| **Emergency Numbers vs Guidelines** | Generic emergency help. | Stitch displays Indian emergency numbers (**112**, **108**, **14416**) while referencing UK NHS clinical standards (**NHS ID**, **NICE CG191**, **NHS Pathways v31**, **DCB0129**). | Inconsistency between regional dispatch codes (India 112/108 vs UK NHS). | Use **112** as the primary universal emergency dispatch number, configurable via `NEXT_PUBLIC_EMERGENCY_NUMBER=112`. |
+| **Biomarker Editing Capability** | Not specified in brief. | Stitch includes an interactive button: `Edit values (Correct misread numbers)` on the report results screen. | Allows patients to correct OCR misread figures before showing them to a clinician. | Implement an accessible modal to manually edit and re-calculate parameter reference bounds. |
+| **Multi-Lingual Localization** | Not specified in brief. | Stitch integrates English, Tamil (`தமிழ்`), and Hindi (`हिन्दी`) in the top app bar, health profile preferences, and component library. | Enhances accessibility for non-English native speakers in multilingual regions. | Implement Next.js lightweight localization context with language selector supporting English, தமிழ், and हिन्दी. |
+
+---
+
+### 7.5 Level 2 Implementation Roadmap & Architectural Guardrails
+
+1. **Routing Architecture:**
+   - Public Routes: `/`, `/emergency`
+   - Auth Routes: `/signup`, `/login`, `/forgot-password`, `/check-email`, `/reset-password`
+   - Protected Routes (Authenticated Shell): `/consent`, `/profile`, `/chat`, `/history`, `/reports`, `/reports/processing`, `/reports/[id]`, `/summary/[conversationId]`, `/settings`
+2. **State Management & Persistence:**
+   - React Context or Zustand store for user session (`useAuthStore`), health profile baseline (`useProfileStore`), and uploaded reports (`useReportStore`).
+   - Mock patient data initialized with Ananya Patel profile to facilitate immediate testing and evaluation.
+3. **Accessibility & Clinical Safety Standards:**
+   - Strict WCAG 2.1 AA compliance (4.5:1 minimum contrast for body text, 3:1 for large headings and UI boundaries).
+   - Strict size floor: No clinical guidance, disclaimer, or helper text below 14px (`caption-md`).
+   - Accessible ARIA attributes (`role="alert"`, `aria-live="polite"`, `aria-expanded`, modal focus trapping).
+   - Prominent, persistent emergency access (112) visible at all times.
+
+---
+
+## 8. Summary & Awaiting User Confirmation
+
+- **Git Branch:** `level-2` (checked out from `main`).
+- **Level 1 Baseline Verification:**
+  - `npm run build`: **PASSED** (0 errors).
+  - `npm test`: **PASSED** (15/15 unit tests passing).
+  - `npm run lint`: **FAILED** (12 TypeScript `any` / unused variable warnings; kept untouched as instructed).
+- **Stitch MCP Review:** 21 Level 2 screens thoroughly inspected in READ-ONLY mode.
+- **Design Specification:** Comprehensive Level 2 specification, 21-screen inventory table, component catalog, exact copy inventory, and discrepancy analysis appended to [docs/design-spec.md](file:///d:/My%20Project/Safe%20Steps/docs/design-spec.md).
+- **Application Code Status:** **No application code written.**
+
+*Awaiting user confirmation to begin Level 2 implementation.*

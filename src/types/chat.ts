@@ -2,6 +2,10 @@
  * Client and API chat type definitions for SafeSteps
  */
 
+import { SourceCitation } from "./response";
+
+export type { SourceCitation };
+
 export type UrgencyLevel = "self_care" | "see_doctor_soon" | "emergency";
 
 /**
@@ -13,6 +17,7 @@ export interface UrgencyResult {
   suggests: string;
   actions: string[];
   warning_signs: string[];
+  sources?: SourceCitation[];
   // Compatibility aliases
   tier?: string;
   summary?: string;
@@ -30,6 +35,7 @@ export interface Message {
   type?: "question" | "result" | "emergency";
   result?: UrgencyResult;
   quick_replies?: string[];
+  sources?: SourceCitation[];
 }
 
 /**
@@ -59,4 +65,6 @@ export interface ApiResponse {
   reason?: string;
   category?: string;
   quick_replies?: string[];
+  sources?: SourceCitation[];
+  conversationId?: string;
 }

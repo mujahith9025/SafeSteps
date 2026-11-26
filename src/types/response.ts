@@ -5,11 +5,23 @@ import { z } from "zod";
  * Enforces strict validation so that unvalidated model output is NEVER sent to the client.
  */
 
+export const sourceCitationSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  source_name: z.string(),
+  source_url: z.string(),
+  excerpt: z.string().optional(),
+  similarity: z.number().optional(),
+});
+
+export type SourceCitation = z.infer<typeof sourceCitationSchema>;
+
 export const questionResponseSchema = z.object({
   type: z.literal("question"),
   message: z.string().min(1, "Question message cannot be empty."),
   quick_replies: z.array(z.string()).optional(),
   options: z.array(z.string()).optional(),
+  sources: z.array(sourceCitationSchema).optional(),
 });
 
 export const resultResponseSchema = z.object({
@@ -23,6 +35,7 @@ export const resultResponseSchema = z.object({
   warning_signs: z
     .array(z.string().min(1))
     .min(1, "At least one warning sign is required."),
+  sources: z.array(sourceCitationSchema).optional(),
 });
 
 export const emergencyResponseSchema = z.object({

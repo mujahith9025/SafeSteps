@@ -105,3 +105,104 @@ export function checkRateLimit(ip: string): RateLimitResult {
     resetTime,
   };
 }
+
+// Separate store for authentication attempts to prevent chat traffic from exhausting auth quota
+const authStore = new Map<string, RateLimitRecord>();
+
+/**
+ * Checks rate limits specifically for authentication actions (login, signup, password reset).
+ * Default: 5 attempts per 60 seconds per IP.
+ */
+export function checkAuthRateLimit(
+  ip: string,
+  maxRequests: number = 5,
+  windowMs: number = 60 * 1000
+): RateLimitResult {
+  const now = Date.now();
+  let record = authStore.get(ip);
+
+  if (!record) {
+    record = { timestamps: [] };
+    authStore.set(ip, record);
+  }
+
+  // Filter timestamps within sliding window
+  record.timestamps = record.timestamps.filter((t) => now - t < windowMs);
+
+  if (record.timestamps.length >= maxRequests) {
+    const oldestTimestamp = record.timestamps[0] || now;
+    const resetTime = oldestTimestamp + windowMs;
+
+    return {
+      allowed: false,
+      remaining: 0,
+      resetTime,
+    };
+  }
+
+  record.timestamps.push(now);
+
+  const remaining = maxRequests - record.timestamps.length;
+  const oldestTimestamp = record.timestamps[0] || now;
+  const resetTime = oldestTimestamp + windowMs;
+
+  return {
+    allowed: true,
+    remaining,
+    resetTime,
+  };
+}
+
+// Separate sliding window store for lab report uploads (5 reports per hour per user)
+const reportStore = new Map<string, RateLimitRecord>();
+
+/**
+ * Checks rate limits for lab report processing.
+ * Limit: 5 reports per hour per user.
+ */
+export function checkReportRateLimit(
+  userId: string,
+  maxRequests: number = 5,
+  windowMs: number = 60 * 60 * 1000
+): RateLimitResult {
+  const now = Date.now();
+  let record = reportStore.get(userId);
+
+  if (!record) {
+    record = { timestamps: [] };
+    reportStore.set(userId, record);
+  }
+
+  // Filter timestamps within 1-hour sliding window
+  record.timestamps = record.timestamps.filter((t) => now - t < windowMs);
+
+  if (record.timestamps.length >= maxRequests) {
+    const oldestTimestamp = record.timestamps[0] || now;
+    const resetTime = oldestTimestamp + windowMs;
+
+    return {
+      allowed: false,
+      remaining: 0,
+      resetTime,
+    };
+  }
+
+  record.timestamps.push(now);
+
+  const remaining = maxRequests - record.timestamps.length;
+  const oldestTimestamp = record.timestamps[0] || now;
+  const resetTime = oldestTimestamp + windowMs;
+
+  return {
+    allowed: true,
+    remaining,
+    resetTime,
+  };
+}
+
+/**
+ * Reset helper for test environments.
+ */
+export function resetReportRateLimitStore(): void {
+  reportStore.clear();
+}
