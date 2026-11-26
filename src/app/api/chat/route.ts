@@ -106,8 +106,9 @@ async function generateAIResponse(
       return await callGroq(messages, systemPrompt);
     } catch (groqErr) {
       const errName = groqErr instanceof Error ? groqErr.name : "GroqError";
+      const errMsg = groqErr instanceof Error ? groqErr.message : String(groqErr);
       console.warn(
-        `[SafeSteps AI Engine] Groq engine fallback to Gemini (Type: ${errName})`
+        `[SafeSteps AI Engine] Groq engine fallback to Gemini (Type: ${errName}, Message: ${errMsg})`
       );
     }
   }

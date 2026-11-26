@@ -345,6 +345,21 @@ export async function DELETE(
       );
     }
 
+    // Verify report ownership
+    const { data: report, error: fetchError } = await supabase
+      .from("reports")
+      .select("id")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (fetchError || !report) {
+      return NextResponse.json(
+        { error: "Report not found or access denied." },
+        { status: 404 }
+      );
+    }
+
     // Cascading delete on report
     const { error } = await supabase
       .from("reports")
