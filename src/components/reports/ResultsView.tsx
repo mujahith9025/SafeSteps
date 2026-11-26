@@ -23,6 +23,7 @@ import {
   Save,
   Trash2,
   Sparkles,
+  Printer,
 } from 'lucide-react'
 import { ReportTable } from './ReportTable'
 import { ReportValueItem } from './ReportRow'
@@ -309,14 +310,24 @@ export function ResultsView({ report, initialValues }: ResultsViewProps) {
               )}
             </button>
 
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              className="h-10 px-3.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-2xs transition-all"
-              title="Print or export report to PDF"
+            <a
+              href={`/api/reports/${report.id}/pdf`}
+              download={`SafeSteps-Report-${report.id.substring(0, 8)}.pdf`}
+              className="h-10 px-3.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
+              title="Download clinical lab report A4 PDF"
             >
               <Download className="w-4 h-4 text-slate-500" />
               <span>Download PDF</span>
+            </a>
+
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              className="h-10 px-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+              title="Print report"
+            >
+              <Printer className="w-4 h-4 text-slate-500" />
+              <span className="hidden sm:inline">Print</span>
             </button>
 
             <button
@@ -550,14 +561,14 @@ export function ResultsView({ report, initialValues }: ResultsViewProps) {
               Your doctor can interpret these numbers in the context of your complete medical history and symptoms.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={handleDownloadPdf}
-            className="h-10 px-4 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shrink-0 transition-colors shadow-xs"
+          <a
+            href={`/api/reports/${report.id}/pdf`}
+            download={`SafeSteps-GP-Discussion-Sheet-${report.id.substring(0, 8)}.pdf`}
+            className="h-10 px-4 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shrink-0 transition-colors shadow-xs cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Export GP Discussion Sheet (PDF)</span>
-          </button>
+          </a>
         </div>
 
         {/* Verbatim Required Footer */}

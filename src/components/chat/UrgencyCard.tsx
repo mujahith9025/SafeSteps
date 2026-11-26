@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   Shield,
   ShieldCheck,
@@ -22,6 +23,7 @@ import {
   Copy,
   Check,
   Printer,
+  Download,
   X,
 } from "lucide-react";
 import { UrgencyResult, UrgencyLevel, SourceCitation } from "@/types/chat";
@@ -30,6 +32,7 @@ import { UrgencyCardSources, SourcesDrawer } from "./SourcesPanel";
 export interface UrgencyCardProps {
   result: UrgencyResult;
   sources?: SourceCitation[];
+  conversationId?: string | null;
   onNewChat?: () => void;
   onShowSummary?: () => void;
   onPrepareVisit?: () => void;
@@ -50,6 +53,7 @@ function getNormalizedUrgency(result: UrgencyResult): UrgencyLevel {
 export function UrgencyCard({
   result,
   sources,
+  conversationId,
   onNewChat,
   onShowSummary,
   onPrepareVisit,
@@ -449,6 +453,30 @@ export function UrgencyCard({
                 <FileText className="h-4 w-4 text-primary" aria-hidden="true" />
                 <span>View Note</span>
               </button>
+
+              {/* Doctor Visit Summary & PDF Actions */}
+              {conversationId && (
+                <>
+                  <Link
+                    href={`/summary/${conversationId}`}
+                    className="px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 border border-teal-200 transition-colors text-caption font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    title="View printable doctor visit summary document"
+                  >
+                    <FileText className="h-4 w-4 text-teal-700" aria-hidden="true" />
+                    <span>Save summary</span>
+                  </Link>
+
+                  <a
+                    href={`/api/summary/${conversationId}/pdf`}
+                    download={`SafeSteps-Visit-Summary-${conversationId.substring(0, 8)}.pdf`}
+                    className="px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white transition-colors text-caption font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    title="Download doctor visit summary PDF"
+                  >
+                    <Download className="h-4 w-4" aria-hidden="true" />
+                    <span>Download visit summary (PDF)</span>
+                  </a>
+                </>
+              )}
 
               {onNewChat && (
                 <button

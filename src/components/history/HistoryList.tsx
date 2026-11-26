@@ -154,35 +154,9 @@ export function HistoryList({ initialConversations }: HistoryListProps) {
     }
   };
 
-  // Single conversation summary download
+  // Single conversation summary download (A4 PDF)
   const handleDownloadSummary = (conv: ConversationSummary) => {
-    const consultationId = `#SF-${conv.id.replace(/-/g, "").substring(0, 5).toUpperCase()}`;
-    const dateStr = new Date(conv.createdAt).toLocaleString();
-    const content = [
-      `SafeSteps Clinical Consultation Summary`,
-      `=======================================`,
-      `Consultation ID: ${consultationId}`,
-      `Title: ${conv.title}`,
-      `Date: ${dateStr}`,
-      `Urgency Level: ${conv.urgency ? conv.urgency.replace(/_/g, " ").toUpperCase() : "NOT SPECIFIED"}`,
-      ``,
-      `Clinical Preview:`,
-      conv.preview || "No messages recorded.",
-      ``,
-      `Clinical Protocol Notice:`,
-      `Guidance is informational triage based on standardized NHS/WHO algorithms.`,
-      `SafeSteps is not a replacement for in-person diagnosis. Call 112 in emergencies.`,
-    ].join("\n");
-
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `safesteps-summary-${conv.id.substring(0, 8)}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    window.open(`/api/summary/${conv.id}/pdf`, "_blank");
   };
 
   // Export all conversations

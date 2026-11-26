@@ -14,6 +14,7 @@ import {
   Sparkles,
   MessageSquare,
   ShieldCheck,
+  FileText,
 } from "lucide-react";
 import { ConversationSummary, UrgencyTier } from "@/lib/conversations";
 
@@ -207,6 +208,16 @@ export function ConversationCard({
               <span>Open conversation</span>
             </Link>
 
+            <Link
+              href={`/summary/${conversation.id}`}
+              role="menuitem"
+              className="px-3.5 py-2 text-text-main hover:bg-slate-50 text-xs sm:text-sm font-medium flex items-center gap-2.5 transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              <FileText className="w-4 h-4 text-teal-700 shrink-0" />
+              <span>View visit summary</span>
+            </Link>
+
             <button
               type="button"
               role="menuitem"
@@ -230,7 +241,7 @@ export function ConversationCard({
               }}
             >
               <Download className="w-4 h-4 text-teal-700 shrink-0" />
-              <span>Download summary</span>
+              <span>Download visit summary (PDF)</span>
             </button>
 
             <div className="h-px bg-slate-100 my-1" />

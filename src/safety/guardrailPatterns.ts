@@ -211,17 +211,18 @@ export const LEAKED_INSTRUCTION_PATTERNS: RegExp[] = [
  * Definite diagnostic proclamations asserting the user has a specific pathology.
  */
 export const DIAGNOSIS_PATTERNS: RegExp[] = [
-  /\byou\s+are\s+suffering\s+from\b/i,
+  /\b(?:you\s+are|the\s+patient\s+is|patient\s+is)\s+suffering\s+from\b/i,
+  /\bsuffers?\s+from\b/i,
   /\byou\s+definitely\s+have\b/i,
   /\bthis\s+is\s+definitely\b/i,
-  /\byou\s+are\s+diagnosed(?:\s+with)?\b/i,
+  /\b(?:you\s+are|the\s+patient\s+is|patient\s+is)\s+diagnosed(?:\s+with)?\b/i,
   /\b(?:i|my)\s+diagnos(?:e|is)\b/i,
   /\bwe\s+diagnose\b/i,
   /\bthe\s+diagnosis\s+is\b/i,
   /\byou\s+most\s+likely\s+have\b/i,
   /\byou\s+certainly\s+have\b/i,
   /\byou\s+clearly\s+have\b/i,
-  /\bconfirm(?:s|ed)?\s+that\s+you\s+have\b/i,
-  /\bconclude\s+that\s+you\s+have\b/i,
-  /\byou\s+have\s+(?:a\s+|an\s+|severe\s+|mild\s+|acute\s+|chronic\s+)?(?:migraine|bronchitis|pneumonia|covid|flu|gastroenteritis|food\s+poisoning|angina|concussion|infection|disease|disorder|syndrome)\b/i,
+  /\bconfirm(?:s|ed)?\s+that\s+(?:you|the\s+patient)\s+have?\b/i,
+  /\bconclude\s+that\s+(?:you|the\s+patient)\s+have?\b/i,
+  /\b(?:you|the\s+patient|patient)\s+has?\s+(?:a\s+|an\s+|severe\s+|mild\s+|acute\s+|chronic\s+|bacterial\s+|viral\s+)?(?:migraine|bronchitis|pneumonia|covid|flu|gastroenteritis|food\s+poisoning|angina|concussion|infection|disease|disorder|syndrome)\b/i,
 ];

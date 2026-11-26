@@ -278,6 +278,7 @@ export function ChatWindow({
                   key={msg.id}
                   result={msg.result!}
                   sources={msg.sources || msg.result?.sources}
+                  conversationId={conversationId}
                   onNewChat={resetChat}
                 />
               );

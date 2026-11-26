@@ -1,0 +1,58 @@
+import { notFound, redirect } from 'next/navigation'
+import type { Metadata } from 'next'
+import { createClient } from '@/lib/supabase/server'
+import { buildVisitSummary } from '@/lib/summary'
+import { VisitSummaryView } from '@/components/summary/VisitSummaryView'
+
+interface VisitSummaryPageProps {
+  params: Promise<{ conversationId: string }>
+}
+
+export async function generateMetadata({
+  params,
+}: VisitSummaryPageProps): Promise<Metadata> {
+  const { conversationId } = await params
+  const supabase = await createClient()
+
+  const { data: conv } = await supabase
+    .from('conversations')
+    .select('title')
+    .eq('id', conversationId)
+    .single()
+
+  return {
+    title: conv ? `Doctor Visit Summary - ${conv.title} | SafeSteps` : 'Doctor Visit Summary | SafeSteps',
+    description: 'Structured clinical consultation intake summary and doctor questions.',
+  }
+}
+
+export default async function VisitSummaryPage({ params }: VisitSummaryPageProps) {
+  const { conversationId } = await params
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect('/login')
+  }
+
+  try {
+    const { summary, conversation, patientDetails } = await buildVisitSummary(
+      conversationId
+    )
+
+    return (
+      <div className="w-full pt-4 sm:pt-6">
+        <VisitSummaryView
+          summary={summary}
+          conversation={conversation}
+          patientDetails={patientDetails}
+        />
+      </div>
+    )
+  } catch {
+    notFound()
+  }
+}
