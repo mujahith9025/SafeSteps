@@ -8,6 +8,14 @@ import { ArrowRight, ShieldCheck, Lock, Sparkles, Send } from "lucide-react";
  * Left: Headline, calm description, CTAs, and trust disclaimer.
  * Right: Realistic HTML/CSS chat consultation preview card.
  */
+const HERO_SYMPTOM_PILLS = [
+  { emoji: "🤕", label: "Headache", query: "I have a headache" },
+  { emoji: "🌡️", label: "Fever & Chills", query: "I have a fever and body chills" },
+  { emoji: "🤢", label: "Stomach Pain", query: "I have stomach pain and nausea" },
+  { emoji: "😵‍💫", label: "Dizziness", query: "I feel dizzy and lightheaded" },
+  { emoji: "🤧", label: "Cough & Cold", query: "I have a persistent cough and sore throat" },
+];
+
 export function HeroSection() {
   return (
     <section
@@ -47,7 +55,7 @@ export function HeroSection() {
           <div className="flex flex-wrap items-center gap-3.5 pt-1 w-full sm:w-auto">
             <Link
               href="/chat"
-              className="w-full sm:w-auto h-12 px-6 rounded-xl bg-primary hover:bg-primary-hover active:bg-primary-active text-white text-sm sm:text-base font-semibold flex items-center justify-center gap-2 transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="w-full sm:w-auto h-12 px-6 rounded-xl bg-primary hover:bg-primary-hover active:bg-primary-active text-white text-sm sm:text-base font-semibold flex items-center justify-center gap-2 transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer"
             >
               <span>Start Symptom Chat</span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -59,6 +67,25 @@ export function HeroSection() {
             >
               How it works
             </a>
+          </div>
+
+          {/* Interactive Hero Symptom Starter Pills */}
+          <div className="w-full pt-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2.5">
+              Or tap a common symptom to start instantly:
+            </span>
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Quick symptom starters">
+              {HERO_SYMPTOM_PILLS.map((pill) => (
+                <Link
+                  key={pill.label}
+                  href={`/chat?symptom=${encodeURIComponent(pill.query)}`}
+                  className="group inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs sm:text-sm font-medium bg-white hover:bg-teal-50 active:bg-teal-100 text-slate-700 hover:text-primary border border-slate-200/90 hover:border-primary/50 transition-all shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer"
+                >
+                  <span className="text-sm" aria-hidden="true">{pill.emoji}</span>
+                  <span>{pill.label}</span>
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Small Trust Line */}

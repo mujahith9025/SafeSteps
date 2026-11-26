@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ChatWindow } from "@/components/chat";
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function ChatPage() {
-  return <ChatWindow />;
+  return (
+    <Suspense fallback={<div className="flex-1 w-full min-h-[calc(100dvh-120px)] bg-background" />}>
+      <ChatWindow />
+    </Suspense>
+  );
 }

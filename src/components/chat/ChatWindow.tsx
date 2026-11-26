@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useChat } from "@/hooks/useChat";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
@@ -16,7 +16,9 @@ import { Shield, ShieldCheck, AlertTriangle } from "lucide-react";
 
 export function ChatWindow() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isOnline = useOnlineStatus();
+  const initialSymptomHandled = useRef<boolean>(false);
   const {
     messages,
     isLoading,
@@ -36,6 +38,34 @@ export function ChatWindow() {
 
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-trigger symptom inquiry when routed from Landing Page with ?symptom=...
+  useEffect(() => {
+    if (initialSymptomHandled.current) return;
+    const symptomParam = searchParams.get("symptom");
+    if (symptomParam && symptomParam.trim().length > 0 && messages.length <= 1) {
+      initialSymptomHandled.current = true;
+      sendMessage(symptomParam.trim());
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, "", "/chat");
+      }
+    }
+  }, [searchParams, messages.length, sendMessage]);
+
+  // Dynamic 3-step triage progress:
+  // Step 1: Symptoms (initial stage)
+  // Step 2: Safety Check (user sent symptoms, questions active)
+  // Step 3: Care Guidance (urgency result card displayed)
+  const hasResult = messages.some((m) => m.type === "result" || m.result);
+  const userMessageCount = messages.filter((m) => m.role === "user").length;
+  let currentStep: 1 | 2 | 3 = 1;
+  if (hasResult) {
+    currentStep = 3;
+  } else if (userMessageCount >= 1 || isLoading) {
+    currentStep = 2;
+  } else {
+    currentStep = 1;
+  }
 
   // Auto-scroll to latest message
   const scrollToBottom = () => {
@@ -66,8 +96,8 @@ export function ChatWindow() {
       {/* Pinned Offline Sticky Top Banner (Stitch State 04) */}
       <OfflineBanner isOffline={!isOnline || errorType === "offline"} />
 
-      {/* Pinned Chat Header */}
-      <ChatHeader onNewChat={resetChat} />
+      {/* Pinned Chat Header with 3-Step Triage Progress Tracker */}
+      <ChatHeader onNewChat={resetChat} currentStep={currentStep} />
 
       {/* Main Centered Chat Container (Max 760px from Stitch) */}
       <div className="flex-1 flex flex-col w-full max-w-[760px] mx-auto min-h-0 relative">

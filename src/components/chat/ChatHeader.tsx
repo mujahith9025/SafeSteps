@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 interface ChatHeaderProps {
   onNewChat?: () => void;
   sessionTitle?: string;
+  currentStep?: 1 | 2 | 3;
 }
 
 export function ChatHeader({
   onNewChat,
   sessionTitle = "Encrypted Session #SF-204",
+  currentStep = 1,
 }: ChatHeaderProps) {
   const [showMobileDisclaimer, setShowMobileDisclaimer] = useState(false);
 
@@ -86,6 +88,93 @@ export function ChatHeader({
             <span>Emergency Help</span>
             <span className="hidden sm:inline">(112)</span>
           </Button>
+        </div>
+      </div>
+
+      {/* 3-Step Triage Progress Tracker */}
+      <div
+        className="bg-slate-50/95 border-t border-border/70 py-2 px-4 select-none"
+        role="region"
+        aria-label="Triage consultation progress tracker"
+      >
+        <div className="max-w-[760px] mx-auto flex items-center justify-between text-xs">
+          {/* Step 1: Symptoms */}
+          <div
+            className={`flex items-center gap-1.5 font-medium transition-colors ${
+              currentStep >= 1 ? "text-primary" : "text-slate-400"
+            }`}
+          >
+            <span
+              className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
+                currentStep > 1
+                  ? "bg-primary text-white"
+                  : currentStep === 1
+                  ? "bg-primary text-white ring-2 ring-primary/25"
+                  : "bg-slate-200 text-slate-500"
+              }`}
+            >
+              {currentStep > 1 ? "✓" : "1"}
+            </span>
+            <span className="text-xs sm:text-caption font-semibold">
+              1. Symptoms
+            </span>
+          </div>
+
+          {/* Connector 1 */}
+          <div
+            className={`flex-1 h-0.5 mx-2.5 sm:mx-4 rounded-full transition-colors ${
+              currentStep >= 2 ? "bg-primary" : "bg-slate-200"
+            }`}
+          />
+
+          {/* Step 2: Safety Check */}
+          <div
+            className={`flex items-center gap-1.5 font-medium transition-colors ${
+              currentStep >= 2 ? "text-primary" : "text-slate-400"
+            }`}
+          >
+            <span
+              className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
+                currentStep > 2
+                  ? "bg-primary text-white"
+                  : currentStep === 2
+                  ? "bg-primary text-white ring-2 ring-primary/25 animate-pulse"
+                  : "bg-slate-200 text-slate-500"
+              }`}
+            >
+              {currentStep > 2 ? "✓" : "2"}
+            </span>
+            <span className="text-xs sm:text-caption font-semibold">
+              2. Safety Check
+            </span>
+          </div>
+
+          {/* Connector 2 */}
+          <div
+            className={`flex-1 h-0.5 mx-2.5 sm:mx-4 rounded-full transition-colors ${
+              currentStep >= 3 ? "bg-emerald-600" : "bg-slate-200"
+            }`}
+          />
+
+          {/* Step 3: Care Guidance */}
+          <div
+            className={`flex items-center gap-1.5 font-medium transition-colors ${
+              currentStep === 3 ? "text-emerald-700 font-bold" : "text-slate-400"
+            }`}
+          >
+            <span
+              className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
+                currentStep === 3
+                  ? "bg-emerald-600 text-white ring-2 ring-emerald-600/30"
+                  : "bg-slate-200 text-slate-500"
+              }`}
+            >
+              3
+            </span>
+            <span className="text-xs sm:text-caption font-semibold">
+              3. Care Guidance
+            </span>
+          </div>
         </div>
       </div>
     </div>
