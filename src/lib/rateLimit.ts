@@ -206,3 +206,103 @@ export function checkReportRateLimit(
 export function resetReportRateLimitStore(): void {
   reportStore.clear();
 }
+
+// Separate stores for data export and account deletion (3 operations per hour per user)
+const exportStore = new Map<string, RateLimitRecord>();
+const deleteStore = new Map<string, RateLimitRecord>();
+
+/**
+ * Checks rate limits for personal data export (JSON archive).
+ * Limit: 3 exports per hour per user.
+ */
+export function checkExportRateLimit(
+  userId: string,
+  maxRequests: number = 3,
+  windowMs: number = 60 * 60 * 1000
+): RateLimitResult {
+  const now = Date.now();
+  let record = exportStore.get(userId);
+
+  if (!record) {
+    record = { timestamps: [] };
+    exportStore.set(userId, record);
+  }
+
+  // Filter timestamps within 1-hour sliding window
+  record.timestamps = record.timestamps.filter((t) => now - t < windowMs);
+
+  if (record.timestamps.length >= maxRequests) {
+    const oldestTimestamp = record.timestamps[0] || now;
+    const resetTime = oldestTimestamp + windowMs;
+
+    return {
+      allowed: false,
+      remaining: 0,
+      resetTime,
+    };
+  }
+
+  record.timestamps.push(now);
+
+  const remaining = maxRequests - record.timestamps.length;
+  const oldestTimestamp = record.timestamps[0] || now;
+  const resetTime = oldestTimestamp + windowMs;
+
+  return {
+    allowed: true,
+    remaining,
+    resetTime,
+  };
+}
+
+/**
+ * Checks rate limits for account deletion attempts.
+ * Limit: 3 attempts per hour per user.
+ */
+export function checkDeleteRateLimit(
+  userId: string,
+  maxRequests: number = 3,
+  windowMs: number = 60 * 60 * 1000
+): RateLimitResult {
+  const now = Date.now();
+  let record = deleteStore.get(userId);
+
+  if (!record) {
+    record = { timestamps: [] };
+    deleteStore.set(userId, record);
+  }
+
+  // Filter timestamps within 1-hour sliding window
+  record.timestamps = record.timestamps.filter((t) => now - t < windowMs);
+
+  if (record.timestamps.length >= maxRequests) {
+    const oldestTimestamp = record.timestamps[0] || now;
+    const resetTime = oldestTimestamp + windowMs;
+
+    return {
+      allowed: false,
+      remaining: 0,
+      resetTime,
+    };
+  }
+
+  record.timestamps.push(now);
+
+  const remaining = maxRequests - record.timestamps.length;
+  const oldestTimestamp = record.timestamps[0] || now;
+  const resetTime = oldestTimestamp + windowMs;
+
+  return {
+    allowed: true,
+    remaining,
+    resetTime,
+  };
+}
+
+/**
+ * Reset helper for settings rate limit stores (tests).
+ */
+export function resetSettingsRateLimitStore(): void {
+  exportStore.clear();
+  deleteStore.clear();
+}
