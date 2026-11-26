@@ -11,10 +11,22 @@ export async function generateMetadata({ params }: ReportPageProps): Promise<Met
   const { id } = await params
   const supabase = await createClient()
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return {
+      title: 'Report Explanation | SafeSteps',
+      description: 'Plain-language clinical lab report explanation and reference intervals.',
+    }
+  }
+
   const { data: report } = await supabase
     .from('reports')
     .select('title')
     .eq('id', id)
+    .eq('user_id', user.id)
     .single()
 
   return {

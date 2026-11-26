@@ -14,10 +14,22 @@ export async function generateMetadata({
   const { conversationId } = await params
   const supabase = await createClient()
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return {
+      title: 'Doctor Visit Summary | SafeSteps',
+      description: 'Structured clinical consultation intake summary and doctor questions.',
+    }
+  }
+
   const { data: conv } = await supabase
     .from('conversations')
     .select('title')
     .eq('id', conversationId)
+    .eq('user_id', user.id)
     .single()
 
   return {

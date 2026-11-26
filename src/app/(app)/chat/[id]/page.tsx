@@ -13,10 +13,23 @@ interface ChatIdPageProps {
 export async function generateMetadata({ params }: ChatIdPageProps): Promise<Metadata> {
   const { id } = await params
   const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return {
+      title: 'Conversation | SafeSteps',
+      description: 'SafeSteps persistent clinical assessment history.',
+    }
+  }
+
   const { data: conv } = await supabase
     .from('conversations')
     .select('title')
     .eq('id', id)
+    .eq('user_id', user.id)
     .single()
 
   return {
