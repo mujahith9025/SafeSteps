@@ -23,6 +23,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getGeminiClient, getGeminiModel } from "@/lib/gemini";
 import { checkOutput } from "@/safety/guardrail";
+import { checkSummaryRateLimit } from "@/lib/rateLimit";
 
 export const symptomItemSchema = z.object({
   name: z.string().trim().min(1),
@@ -231,7 +232,16 @@ export async function buildVisitSummary(
     }
   }
 
-  // 5. Load messages ordered chronologically
+  // 5. Rate limit newly generated summaries (5 per hour per user)
+  const rateLimit = checkSummaryRateLimit(user.id);
+  if (!rateLimit.allowed) {
+    const waitMinutes = Math.ceil((rateLimit.resetTime - Date.now()) / (60 * 1000));
+    throw new Error(
+      `Summary generation rate limit reached. You can generate up to 5 consultation summaries per hour. Please try again in about ${waitMinutes} minute${waitMinutes > 1 ? "s" : ""}.`
+    );
+  }
+
+  // 6. Load messages ordered chronologically
   const { data: messagesData, error: msgError } = await supabase
     .from("messages")
     .select("role, content, structured, created_at")

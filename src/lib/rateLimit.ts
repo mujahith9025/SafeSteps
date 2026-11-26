@@ -306,3 +306,57 @@ export function resetSettingsRateLimitStore(): void {
   exportStore.clear();
   deleteStore.clear();
 }
+
+// Separate sliding window store for visit summary generation (5 summaries per hour per user)
+const summaryStore = new Map<string, RateLimitRecord>();
+
+/**
+ * Checks rate limits for consultation summary generation.
+ * Limit: 5 summaries per hour per user.
+ */
+export function checkSummaryRateLimit(
+  userId: string,
+  maxRequests: number = 5,
+  windowMs: number = 60 * 60 * 1000
+): RateLimitResult {
+  const now = Date.now();
+  let record = summaryStore.get(userId);
+
+  if (!record) {
+    record = { timestamps: [] };
+    summaryStore.set(userId, record);
+  }
+
+  // Filter timestamps within 1-hour sliding window
+  record.timestamps = record.timestamps.filter((t) => now - t < windowMs);
+
+  if (record.timestamps.length >= maxRequests) {
+    const oldestTimestamp = record.timestamps[0] || now;
+    const resetTime = oldestTimestamp + windowMs;
+
+    return {
+      allowed: false,
+      remaining: 0,
+      resetTime,
+    };
+  }
+
+  record.timestamps.push(now);
+
+  const remaining = maxRequests - record.timestamps.length;
+  const oldestTimestamp = record.timestamps[0] || now;
+  const resetTime = oldestTimestamp + windowMs;
+
+  return {
+    allowed: true,
+    remaining,
+    resetTime,
+  };
+}
+
+/**
+ * Reset helper for summary rate limit store (tests).
+ */
+export function resetSummaryRateLimitStore(): void {
+  summaryStore.clear();
+}

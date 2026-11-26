@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { chatMessageSchema, chatRequestSchema } from "../src/app/api/chat/route";
-import { checkRateLimit, getClientIp } from "../src/lib/rateLimit";
+import {
+  checkRateLimit,
+  getClientIp,
+  checkSummaryRateLimit,
+  resetSummaryRateLimitStore,
+} from "../src/lib/rateLimit";
 
 describe("SafeSteps Request Validation Schema", () => {
   it("rejects empty or whitespace-only messages", () => {
@@ -158,5 +163,34 @@ describe("SafeSteps Server-Side Rate Limiter", () => {
 
     const emptyHeaders = new Headers();
     expect(getClientIp(emptyHeaders)).toBe("127.0.0.1");
+  });
+
+  describe("Doctor Visit Summary Rate Limiter (checkSummaryRateLimit)", () => {
+    it("allows up to 5 summaries per hour and blocks the 6th", () => {
+      resetSummaryRateLimitStore();
+      const testUserId = `user-summary-test-${Date.now()}`;
+
+      for (let i = 1; i <= 5; i++) {
+        const res = checkSummaryRateLimit(testUserId, 5, 3600000);
+        expect(res.allowed).toBe(true);
+        expect(res.remaining).toBe(5 - i);
+      }
+
+      const blocked = checkSummaryRateLimit(testUserId, 5, 3600000);
+      expect(blocked.allowed).toBe(false);
+      expect(blocked.remaining).toBe(0);
+      expect(blocked.resetTime).toBeGreaterThan(Date.now());
+    });
+
+    it("resets rate limit store successfully", () => {
+      const testUserId = `user-summary-reset-${Date.now()}`;
+      for (let i = 1; i <= 5; i++) {
+        checkSummaryRateLimit(testUserId, 5, 3600000);
+      }
+      expect(checkSummaryRateLimit(testUserId, 5, 3600000).allowed).toBe(false);
+
+      resetSummaryRateLimitStore();
+      expect(checkSummaryRateLimit(testUserId, 5, 3600000).allowed).toBe(true);
+    });
   });
 });

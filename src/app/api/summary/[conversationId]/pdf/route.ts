@@ -68,9 +68,12 @@ export async function GET(
       },
     });
   } catch (err: any) {
+    const isRateLimit =
+      typeof err?.message === "string" &&
+      err.message.toLowerCase().includes("rate limit");
     return NextResponse.json(
       { error: err.message || "Failed to generate visit summary PDF." },
-      { status: 500 }
+      { status: isRateLimit ? 429 : 500 }
     );
   }
 }
