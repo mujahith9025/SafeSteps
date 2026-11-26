@@ -55,7 +55,7 @@ export function UrgencyCard({
   sources,
   conversationId,
   onNewChat,
-  onShowSummary,
+  onShowSummary: _onShowSummary,
   onPrepareVisit,
   className = "",
 }: UrgencyCardProps) {

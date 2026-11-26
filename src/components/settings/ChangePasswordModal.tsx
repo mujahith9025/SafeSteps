@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react'
 import { KeyRound, X, Eye, EyeOff, Check, AlertCircle, Loader2 } from 'lucide-react'
 import { changePasswordAction } from '@/app/(app)/settings/actions'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 export interface ChangePasswordModalProps {
   isOpen: boolean
@@ -19,6 +20,21 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  const handleClose = () => {
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmPassword('')
+    setError(null)
+    setSuccess(null)
+    onClose()
+  }
+
+  const modalRef = useModalA11y<HTMLDivElement>({
+    isOpen,
+    onClose: handleClose,
+    disabled: isPending,
+  })
 
   if (!isOpen) return null
 
@@ -59,17 +75,9 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
     })
   }
 
-  const handleClose = () => {
-    setCurrentPassword('')
-    setNewPassword('')
-    setConfirmPassword('')
-    setError(null)
-    setSuccess(null)
-    onClose()
-  }
-
   return (
     <div
+      ref={modalRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="change-password-title"
@@ -101,14 +109,14 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
 
         {/* Feedback alerts */}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700">
+          <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700">
             <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl flex items-start gap-2.5 text-xs text-teal-800">
+          <div role="status" className="p-3 bg-teal-50 border border-teal-200 rounded-xl flex items-start gap-2.5 text-xs text-teal-800">
             <Check className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
             <span>{success}</span>
           </div>
@@ -118,11 +126,12 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Current Password */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-700 block">
+            <label htmlFor="current-password-input" className="text-xs font-semibold text-slate-700 block">
               Current password
             </label>
             <div className="relative">
               <input
+                id="current-password-input"
                 type={showCurrent ? 'text' : 'password'}
                 required
                 value={currentPassword}
@@ -132,6 +141,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               />
               <button
                 type="button"
+                aria-label={showCurrent ? 'Hide current password' : 'Show current password'}
                 onClick={() => setShowCurrent(!showCurrent)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
               >
@@ -142,11 +152,12 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
 
           {/* New Password */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-700 block">
+            <label htmlFor="new-password-input" className="text-xs font-semibold text-slate-700 block">
               New password
             </label>
             <div className="relative">
               <input
+                id="new-password-input"
                 type={showNew ? 'text' : 'password'}
                 required
                 value={newPassword}
@@ -156,6 +167,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               />
               <button
                 type="button"
+                aria-label={showNew ? 'Hide new password' : 'Show new password'}
                 onClick={() => setShowNew(!showNew)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
               >
@@ -166,11 +178,12 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
 
           {/* Confirm Password */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-700 block">
+            <label htmlFor="confirm-password-input" className="text-xs font-semibold text-slate-700 block">
               Confirm new password
             </label>
             <div className="relative">
               <input
+                id="confirm-password-input"
                 type={showConfirm ? 'text' : 'password'}
                 required
                 value={confirmPassword}
@@ -180,6 +193,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               />
               <button
                 type="button"
+                aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
                 onClick={() => setShowConfirm(!showConfirm)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
               >

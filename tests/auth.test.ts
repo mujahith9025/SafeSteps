@@ -7,7 +7,7 @@ import {
   calculatePasswordStrength,
 } from '../src/lib/validations/auth'
 import { checkAuthRateLimit } from '../src/lib/rateLimit'
-import { sanitizeRedirectUrl } from '../src/app/(auth)/actions'
+import { sanitizeRedirectUrl } from '../src/lib/url'
 
 describe('SafeSteps Authentication Validation & Security', () => {
   describe('Sign Up Schema Validation', () => {

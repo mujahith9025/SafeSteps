@@ -88,7 +88,6 @@ export function buildSafeFallbackVisitSummary(
 ): VisitSummary {
   const userMessages = messages.filter((m) => m.role === "user");
   const firstUserMsg = userMessages[0]?.content || "Health symptoms described.";
-  const lastUserMsg = userMessages[userMessages.length - 1]?.content || "";
 
   const urgency = conversation.urgency || "see_doctor_soon";
   const urgencyLabel =

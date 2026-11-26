@@ -141,13 +141,16 @@ export function ReportTable({
       {/* Results Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
+          <caption className="sr-only">
+            Laboratory test results, measured values, reference intervals, and clinical status
+          </caption>
           <thead>
             <tr className="border-b border-slate-200 text-slate-500 text-[11px] font-semibold uppercase tracking-wider bg-slate-50/60">
-              <th className="py-3 px-4 sm:px-5">Test Name &amp; Abbreviation</th>
-              <th className="py-3 px-3 sm:px-4">Your Value</th>
-              <th className="py-3 px-3 sm:px-4">Unit</th>
-              <th className="py-3 px-3 sm:px-4">Usual Range (Benchmark)</th>
-              <th className="py-3 px-4 sm:px-5 text-right">Status</th>
+              <th scope="col" className="py-3 px-4 sm:px-5">Test Name &amp; Abbreviation</th>
+              <th scope="col" className="py-3 px-3 sm:px-4">Your Value</th>
+              <th scope="col" className="py-3 px-3 sm:px-4">Unit</th>
+              <th scope="col" className="py-3 px-3 sm:px-4">Usual Range (Benchmark)</th>
+              <th scope="col" className="py-3 px-4 sm:px-5 text-right">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-slate-800 text-xs">

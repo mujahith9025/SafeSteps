@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { Trash2, AlertTriangle, X } from 'lucide-react'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 export interface DeleteProfileModalProps {
   isOpen: boolean
@@ -16,33 +17,17 @@ export function DeleteProfileModal({
   onConfirm,
   isDeleting = false,
 }: DeleteProfileModalProps) {
-  const dialogRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    // Auto-focus cancel button for safe keyboard navigation
-    const timer = setTimeout(() => {
-      dialogRef.current?.querySelector<HTMLElement>('button[data-cancel]')?.focus()
-    }, 50)
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      clearTimeout(timer)
-    }
-  }, [isOpen, onClose])
+  const dialogRef = useModalA11y<HTMLDivElement>({
+    isOpen,
+    onClose,
+    disabled: isDeleting,
+  })
 
   if (!isOpen) return null
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-profile-title"

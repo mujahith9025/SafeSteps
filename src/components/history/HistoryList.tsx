@@ -9,7 +9,7 @@ import { HistoryEmptyState } from "./HistoryEmptyState";
 import { DeleteConversationModal } from "./DeleteConversationModal";
 import { RenameModal } from "./RenameModal";
 import { renameConversationAction, deleteConversationAction } from "@/app/(app)/history/actions";
-import { ArrowDown, Loader2 } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface HistoryListProps {

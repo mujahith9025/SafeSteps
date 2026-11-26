@@ -18,7 +18,6 @@ export function AuthAlert({
   onClose,
   className = '',
 }: AuthAlertProps) {
-  const isError = type === 'error'
   const isRateLimit = type === 'rate-limit' || type === 'warning'
   const isSuccess = type === 'success'
 

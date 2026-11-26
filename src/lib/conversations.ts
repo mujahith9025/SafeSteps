@@ -1,4 +1,4 @@
-import { cleanFreeText, containsContactDetails } from './validations/profile'
+import { cleanFreeText } from './validations/profile'
 
 /**
  * Auto-titles a conversation from the first user message:

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Trash2, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConversationSummary } from "@/lib/conversations";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 interface DeleteConversationModalProps {
   conversation: ConversationSummary | null;
@@ -20,23 +21,17 @@ export function DeleteConversationModal({
   onClose,
   onConfirm,
 }: DeleteConversationModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  // Close on Escape
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && isOpen && !isDeleting) {
-        onClose();
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isDeleting, onClose]);
+  const containerRef = useModalA11y<HTMLDivElement>({
+    isOpen,
+    onClose,
+    disabled: isDeleting,
+  });
 
   if (!isOpen || !conversation) return null;
 
   return (
     <div
+      ref={containerRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-dialog-title"
@@ -44,7 +39,6 @@ export function DeleteConversationModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in"
     >
       <div
-        ref={modalRef}
         className="w-full max-w-lg bg-white rounded-2xl p-6 shadow-xl border border-border/70 flex flex-col gap-4 animate-scale-in"
       >
         <div className="flex items-start gap-4">

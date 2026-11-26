@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { LogIn, ArrowRight, Loader2 } from 'lucide-react'
 import {
   AuthCard,
@@ -14,7 +14,6 @@ import { loginSchema } from '@/lib/validations/auth'
 import { loginAction } from '../actions'
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
 
   const returnUrl = searchParams.get('returnUrl')

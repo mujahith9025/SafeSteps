@@ -192,15 +192,25 @@ export function ReportRow({
   return (
     <>
       <tr
+        tabIndex={0}
+        role="button"
+        aria-expanded={isExpanded}
+        aria-label={`${item.test_name}: ${item.value_numeric ?? item.value_text ?? '—'} ${item.unit || ''}, Status ${item.status}. Click or press Enter to expand explanation.`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            if (!isEditing) setIsExpanded(!isExpanded)
+          }
+        }}
         onClick={() => {
           if (!isEditing) setIsExpanded(!isExpanded)
         }}
-        className={`lab-row cursor-pointer transition-colors border-b border-slate-100 ${
+        className={`lab-row cursor-pointer transition-colors border-b border-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-inset ${
           isExpanded ? 'bg-teal-50/20' : 'hover:bg-slate-50/80 bg-white'
         }`}
       >
-        {/* Column 1: Test Name */}
-        <td className="py-4 px-4 sm:px-5">
+        {/* Column 1: Test Name (Row Header) */}
+        <th scope="row" className="font-normal py-4 px-4 sm:px-5 text-left">
           <div className="flex items-center gap-2.5">
             <ChevronDown
               className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
@@ -223,7 +233,7 @@ export function ReportRow({
               </span>
             </div>
           </div>
-        </td>
+        </th>
 
         {/* Column 2: Value */}
         <td className="py-4 px-3 sm:px-4 font-mono font-medium text-sm">

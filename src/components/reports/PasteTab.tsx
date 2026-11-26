@@ -23,6 +23,7 @@ export function PasteTab({ text, onChange, disabled = false }: PasteTabProps) {
             Paste lab report values or text below
           </label>
           <span
+            id="paste-char-count"
             className={`text-xs font-medium ${
               isOverLimit ? 'text-rose-600 font-bold' : 'text-slate-400'
             }`}
@@ -36,6 +37,8 @@ export function PasteTab({ text, onChange, disabled = false }: PasteTabProps) {
           rows={7}
           value={text}
           disabled={disabled}
+          aria-invalid={isOverLimit}
+          aria-describedby="paste-char-count"
           onChange={(e) => onChange(e.target.value)}
           placeholder={`e.g. 
 Hemoglobin: 11.2 g/dL (Ref: 12.0 - 15.5)

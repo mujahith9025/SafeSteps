@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { SettingsTabs } from '@/components/settings/SettingsTabs'
 

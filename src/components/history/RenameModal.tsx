@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConversationSummary } from "@/lib/conversations";
+import { useModalA11y } from "@/hooks/useModalA11y";
 
 interface RenameModalProps {
   conversation: ConversationSummary | null;
@@ -20,31 +21,22 @@ export function RenameModal({
   onClose,
   onSave,
 }: RenameModalProps) {
-  const [titleValue, setTitleValue] = useState("");
+  const [prevConversation, setPrevConversation] = useState(conversation);
+  const [titleValue, setTitleValue] = useState(conversation?.title || "");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (conversation) {
-      setTitleValue(conversation.title);
-    }
-  }, [conversation]);
+  // Sync state when conversation prop changes during render
+  if (conversation !== prevConversation) {
+    setPrevConversation(conversation);
+    setTitleValue(conversation ? conversation.title : "");
+  }
 
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
-  }, [isOpen]);
-
-  // Close on Escape
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && isOpen && !isSaving) {
-        onClose();
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isSaving, onClose]);
+  const modalRef = useModalA11y<HTMLDivElement>({
+    isOpen,
+    onClose,
+    initialFocusRef: inputRef,
+    disabled: isSaving,
+  });
 
   if (!isOpen || !conversation) return null;
 
@@ -57,6 +49,7 @@ export function RenameModal({
 
   return (
     <div
+      ref={modalRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="rename-dialog-title"

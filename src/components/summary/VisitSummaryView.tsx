@@ -12,11 +12,9 @@ import {
   Calendar,
   AlertTriangle,
   Clock,
-  Sparkles,
   Lock,
   History,
   CheckCircle2,
-  AlertCircle,
   FileText,
   BadgeCheck,
 } from 'lucide-react'

@@ -23,7 +23,6 @@ import { createClient } from "@/lib/supabase/server";
 import { checkReportRateLimit } from "@/lib/rateLimit";
 import {
   validateReportFileBytes,
-  MAX_FILE_SIZE_BYTES,
 } from "@/reports/fileValidation";
 import { parseReportText } from "@/reports/parseText";
 import { normaliseTestName } from "@/reports/normalise";
@@ -498,6 +497,8 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const dynamic = 'force-dynamic';
 
 // -----------------------------------------------------------------------------
 // GET /api/reports - Fetch previous reports list for signed-in user

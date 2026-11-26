@@ -117,6 +117,8 @@ export function TagInput({
             }}
             onKeyDown={handleKeyDown}
             disabled={disabled || tags.length >= maxTags}
+            aria-invalid={Boolean(displayError)}
+            aria-describedby={displayError && id ? `${id}-error` : undefined}
             placeholder={
               tags.length >= maxTags
                 ? `Maximum limit reached (${maxTags} items)`
@@ -144,6 +146,7 @@ export function TagInput({
       {/* Inline Error Message */}
       {displayError && (
         <div
+          id={id ? `${id}-error` : undefined}
           role="alert"
           className="flex items-center gap-1.5 text-xs text-red-600 font-medium animate-in fade-in duration-150"
         >

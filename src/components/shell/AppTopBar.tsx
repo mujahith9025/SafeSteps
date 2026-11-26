@@ -66,8 +66,8 @@ export function AppTopBar({ onOpenMobile, isMobileOpen = false }: AppTopBarProps
           className="h-10 px-3 sm:px-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 shadow-xs transition-colors shrink-0 focus:outline-none focus:ring-2 focus:ring-red-600/30"
         >
           <PhoneCall className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" />
-          <span className="hidden xs:inline">{t('emergencyButton')}</span>
-          <span className="xs:hidden">{t('emergencyShort')}</span>
+          <span className="hidden sm:inline">{t('emergencyButton')}</span>
+          <span className="sm:hidden">{t('emergencyShort')}</span>
         </Link>
       </div>
     </header>

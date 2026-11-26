@@ -3,14 +3,11 @@
 import React, { useState, useEffect } from "react";
 import {
   BookOpen,
-  FileText,
   ExternalLink,
   ChevronDown,
   ChevronUp,
   ShieldCheck,
   X,
-  Library,
-  GraduationCap,
 } from "lucide-react";
 import { SourceCitation } from "@/types/response";
 
@@ -80,13 +77,15 @@ export function SourcesDrawer({
   title = "Verified Sources & Excerpts",
   className = "",
 }: SourcesDrawerProps) {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
   const [isExpanded, setIsExpanded] = useState(isOpen);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
 
-  // Sync external isOpen prop
-  useEffect(() => {
+  // Sync external isOpen prop during render (React-recommended pattern)
+  if (prevIsOpen !== isOpen) {
+    setPrevIsOpen(isOpen);
     setIsExpanded(isOpen);
-  }, [isOpen]);
+  }
 
   // Close mobile bottom sheet on Escape key
   useEffect(() => {

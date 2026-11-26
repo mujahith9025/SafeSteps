@@ -28,20 +28,30 @@ export interface SettingsTabsProps {
 }
 
 export function SettingsTabs({ user, profile }: SettingsTabsProps) {
-  const [activeTab, setActiveTab] = useState<SettingsTabId>('privacy')
+  const [activeTab, setActiveTab] = useState<SettingsTabId>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '')
+      if (hash === 'account' || hash === 'privacy' || hash === 'language') {
+        return hash as SettingsTabId
+      }
+    }
+    return 'privacy'
+  })
   const [exportToastInfo, setExportToastInfo] = useState<{
     fileSize: string
     filename: string
   } | null>(null)
 
-  // Listen to hash changes or initial hash
+  // Listen to hash changes if user navigates via browser back/forward
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    const onHashChange = () => {
       const hash = window.location.hash.replace('#', '')
       if (hash === 'account' || hash === 'privacy' || hash === 'language') {
         setActiveTab(hash as SettingsTabId)
       }
     }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
   const handleTabClick = (tab: SettingsTabId) => {

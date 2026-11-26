@@ -50,21 +50,22 @@ export default async function VisitSummaryPage({ params }: VisitSummaryPageProps
     redirect('/login')
   }
 
+  let result: Awaited<ReturnType<typeof buildVisitSummary>>
   try {
-    const { summary, conversation, patientDetails } = await buildVisitSummary(
-      conversationId
-    )
-
-    return (
-      <div className="w-full pt-4 sm:pt-6">
-        <VisitSummaryView
-          summary={summary}
-          conversation={conversation}
-          patientDetails={patientDetails}
-        />
-      </div>
-    )
+    result = await buildVisitSummary(conversationId)
   } catch {
     notFound()
   }
+
+  const { summary, conversation, patientDetails } = result
+
+  return (
+    <div className="w-full pt-4 sm:pt-6">
+      <VisitSummaryView
+        summary={summary}
+        conversation={conversation}
+        patientDetails={patientDetails}
+      />
+    </div>
+  )
 }

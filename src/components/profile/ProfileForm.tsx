@@ -69,12 +69,10 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   const [globalError, setGlobalError] = useState<string | null>(null)
 
   // Maternal safety rule: Pregnancy is only applicable for female aged 12-55
-  useEffect(() => {
-    const isEligibleFemale = sex === 'female' && age !== null && age >= 12 && age <= 55
-    if (!isEligibleFemale && pregnant) {
-      setPregnant(false)
-    }
-  }, [sex, age, pregnant])
+  const isEligibleFemale = sex === 'female' && age !== null && age >= 12 && age <= 55
+  if (!isEligibleFemale && pregnant) {
+    setPregnant(false)
+  }
 
   // Track if current state differs from last saved state
   const isDirty = useMemo(() => {

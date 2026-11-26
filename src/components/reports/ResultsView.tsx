@@ -197,7 +197,11 @@ export function ResultsView({ report, initialValues }: ResultsViewProps) {
     <div className="flex flex-col w-full max-w-[1140px] mx-auto pb-16 px-4 sm:px-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-teal-800 text-white shadow-xl flex items-center gap-3 transition-all animate-bounce print:hidden">
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-teal-800 text-white shadow-xl flex items-center gap-3 transition-all animate-bounce print:hidden"
+        >
           <CheckCircle2 className="w-5 h-5 text-teal-200" />
           <span className="text-xs font-medium">{toastMessage}</span>
         </div>

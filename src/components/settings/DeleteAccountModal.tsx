@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2, X, AlertTriangle, Loader2 } from 'lucide-react'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 export interface DeleteAccountModalProps {
   isOpen: boolean
@@ -19,6 +20,19 @@ export function DeleteAccountModal({
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+
+  const handleClose = () => {
+    if (isDeleting) return
+    setConfirmText('')
+    setError(null)
+    onClose()
+  }
+
+  const modalRef = useModalA11y<HTMLDivElement>({
+    isOpen,
+    onClose: handleClose,
+    disabled: isDeleting,
+  })
 
   if (!isOpen) return null
 
@@ -55,15 +69,9 @@ export function DeleteAccountModal({
     }
   }
 
-  const handleClose = () => {
-    if (isDeleting) return
-    setConfirmText('')
-    setError(null)
-    onClose()
-  }
-
   return (
     <div
+      ref={modalRef}
       id="delete-modal-overlay"
       role="dialog"
       aria-modal="true"
@@ -107,7 +115,7 @@ export function DeleteAccountModal({
 
         {/* Error notification if any */}
         {error && (
-          <div className="p-3 bg-red-100/80 border border-red-300 rounded-xl text-xs text-red-900 font-medium">
+          <div id="delete-error" role="alert" className="p-3 bg-red-100/80 border border-red-300 rounded-xl text-xs text-red-900 font-medium">
             {error}
           </div>
         )}
@@ -121,6 +129,8 @@ export function DeleteAccountModal({
             id="delete-input-confirm"
             type="text"
             disabled={isDeleting}
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? 'delete-error' : undefined}
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder="Type DELETE to confirm"
