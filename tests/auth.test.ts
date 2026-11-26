@@ -7,6 +7,7 @@ import {
   calculatePasswordStrength,
 } from '../src/lib/validations/auth'
 import { checkAuthRateLimit } from '../src/lib/rateLimit'
+import { sanitizeRedirectUrl } from '../src/app/(auth)/actions'
 
 describe('SafeSteps Authentication Validation & Security', () => {
   describe('Sign Up Schema Validation', () => {
@@ -153,6 +154,43 @@ describe('SafeSteps Authentication Validation & Security', () => {
       const blocked = checkAuthRateLimit(testIp, 5, 60000)
       expect(blocked.allowed).toBe(false)
       expect(blocked.remaining).toBe(0)
+    })
+  })
+
+  describe('Open Redirect Hardening (sanitizeRedirectUrl)', () => {
+    it('allows valid application paths', () => {
+      expect(sanitizeRedirectUrl('/chat')).toBe('/chat')
+      expect(sanitizeRedirectUrl('/consent')).toBe('/consent')
+      expect(sanitizeRedirectUrl('/profile')).toBe('/profile')
+      expect(sanitizeRedirectUrl('/history')).toBe('/history')
+      expect(sanitizeRedirectUrl('/reports')).toBe('/reports')
+      expect(sanitizeRedirectUrl('/settings')).toBe('/settings')
+      expect(sanitizeRedirectUrl('/chat/12345')).toBe('/chat/12345')
+      expect(sanitizeRedirectUrl('/summary/conv-123')).toBe('/summary/conv-123')
+      expect(sanitizeRedirectUrl('/chat?locale=ta')).toBe('/chat?locale=ta')
+    })
+
+    it('rejects external domain redirects and falls back to /chat', () => {
+      expect(sanitizeRedirectUrl('https://evil.com')).toBe('/chat')
+      expect(sanitizeRedirectUrl('http://attacker.com/chat')).toBe('/chat')
+      expect(sanitizeRedirectUrl('//evil.com')).toBe('/chat')
+      expect(sanitizeRedirectUrl('//evil.com/chat')).toBe('/chat')
+      expect(sanitizeRedirectUrl('javascript:alert(1)')).toBe('/chat')
+    })
+
+    it('rejects backslash and protocol-relative bypass attempts', () => {
+      expect(sanitizeRedirectUrl('/\\evil.com')).toBe('/chat')
+      expect(sanitizeRedirectUrl('\\evil.com')).toBe('/chat')
+      expect(sanitizeRedirectUrl('/chat\\evil.com')).toBe('/chat')
+      expect(sanitizeRedirectUrl('/chat/..\\evil.com')).toBe('/chat')
+    })
+
+    it('rejects unwhitelisted root paths', () => {
+      expect(sanitizeRedirectUrl('/admin')).toBe('/chat')
+      expect(sanitizeRedirectUrl('/secret')).toBe('/chat')
+      expect(sanitizeRedirectUrl('')).toBe('/chat')
+      expect(sanitizeRedirectUrl(null)).toBe('/chat')
+      expect(sanitizeRedirectUrl(undefined)).toBe('/chat')
     })
   })
 })
