@@ -65,6 +65,19 @@ export default async function SettingsPage() {
 
       {/* Main Settings Tabs Container */}
       <SettingsTabs user={userData} profile={profile} />
+
+      {/* Settings Footer / Status Note */}
+      <footer className="pt-6 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span>SafeSteps Platform • Operational</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span>App Version <strong className="font-semibold text-slate-700">v2</strong></span>
+          <span className="text-slate-300">•</span>
+          <span>Level 2 Clinical Architecture</span>
+        </div>
+      </footer>
     </div>
   )
 }

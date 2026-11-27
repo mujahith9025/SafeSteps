@@ -1,8 +1,8 @@
-# SafeSteps — Clinical AI Health Guidance Assistant
+# SafeSteps — Clinical AI Health Guidance Assistant (Level 2)
 
 > **Tagline:** *Understand your symptoms. Know your next step, safely.*
 
-SafeSteps is a calm, compassionate AI health guidance assistant engineered for the general public in India. It empowers individuals experiencing non-emergency health symptoms to describe what they feel in everyday language and receive structured, reassuring guidance on care urgency — whether to rest at home, schedule a doctor appointment, or seek immediate emergency care.
+SafeSteps is a calm, compassionate AI health guidance assistant engineered for the general public in India. It empowers individuals experiencing non-emergency health symptoms or reviewing complex pathology lab reports to describe what they feel in everyday language and receive structured, reassuring guidance on care urgency — whether to rest at home, schedule a doctor appointment, or seek immediate emergency care.
 
 Built with a **safety-first clinical architecture**, SafeSteps runs high-sensitivity emergency detection *before* any AI call and executes strict output guardrails *after* model inference to ensure zero diagnoses, zero drug dosages, and zero unprescribed pharmaceutical recommendations.
 
@@ -13,6 +13,7 @@ Built with a **safety-first clinical architecture**, SafeSteps runs high-sensiti
 - **Production URL:** [https://safesteps-kappa.vercel.app](https://safesteps-kappa.vercel.app)
 - **Alternate Domain:** [https://safesteps-projects-f4ef.vercel.app](https://safesteps-projects-f4ef.vercel.app)
 - **Health Check Probe:** [https://safesteps-kappa.vercel.app/api/health](https://safesteps-kappa.vercel.app/api/health)
+- **Database Health Probe:** [https://safesteps-kappa.vercel.app/api/health/db](https://safesteps-kappa.vercel.app/api/health/db)
 - **GitHub Repository:** [https://github.com/mujahith9025/SafeSteps](https://github.com/mujahith9025/SafeSteps)
 
 ---
@@ -20,310 +21,283 @@ Built with a **safety-first clinical architecture**, SafeSteps runs high-sensiti
 ## ⚠️ Mandatory Medical Disclaimer
 
 > [!IMPORTANT]
-> **SafeSteps provides general health information and triage guidance only. It is NOT a doctor, medical service, or diagnostic device.**
-> - SafeSteps does **not** diagnose medical conditions.
-> - SafeSteps does **not** prescribe medications or recommend specific dosages.
+> **SafeSteps provides general health information and triage guidance only. It is NOT a doctor, medical service, or diagnostic medical device.**
+> - SafeSteps does **not** diagnose medical conditions or issue clinical prognoses.
+> - SafeSteps does **not** prescribe medications or recommend specific drug dosages.
 > - **In an acute medical emergency, do NOT use this application. Call Emergency Services (112) or Ambulance (108) immediately, or go to the nearest hospital emergency room.**
 > - If you are experiencing thoughts of self-harm or a mental health crisis, call **Tele-MANAS** at **14416** immediately.
-> - *This project is developed as an academic engineering project and has not been evaluated by health regulatory authorities.*
+> - *This project is developed as an academic engineering demonstration and has not been certified by health regulatory authorities.*
 
 ---
 
-## 🌟 Key Features
+## 🌟 Level 2 Key Features
 
-- **Dual-Engine AI Architecture**: Powered by **Groq** (`openai/gpt-oss-120b`) delivering ultra-fast 300ms clinical triage with 14,400 daily requests, backed by **Google Gemini** (`gemini-3.5-flash`) with automatic graceful failover.
-- **Clinical Triage Follow-Up**: Gathers symptom context through 3 to 5 targeted, conversational questions (duration, severity, age group, existing conditions) in a single calming message without demanding personal identifiers.
-- **3-Tier Urgency Classification**:
-  - 🟢 **Level 1 (Self-Care at Home)**: Mild, reversible symptoms manageable with rest, hydration, comfort measures, and watchful waiting.
-  - 🟡 **Level 2 (See a Doctor Soon)**: Moderate symptoms requiring clinical evaluation, diagnostic tests, or doctor review within 24 to 48 hours.
-  - 🔴 **Level 3 (Emergency Care)**: Red-flag symptoms requiring immediate hospital emergency dispatch.
-- **Pre-Flight Emergency Detection Engine**:
-  - Scans user input **before** invoking Gemini with 100% recall across 30 red-flag phrases (cardiac, breathing, stroke, profuse bleeding, altered consciousness, severe allergic anaphylaxis, poisoning, self-harm, and infant distress).
-  - Bypasses LLM completely during emergencies, eliminating inference delays or API failure risks.
-  - Instantly redirects the client to `/emergency` with one-tap `112` and `108` calling bridges.
+- **Dual-Engine Clinical AI Architecture**: Powered by **Groq** (`openai/gpt-oss-120b`) delivering ultra-fast 300ms clinical triage with 14,400 daily requests, backed by **Google Gemini** (`gemini-3.5-flash`) with automatic graceful failover.
+- **RAG Knowledge Base & Grounded Citations**: Semantic vector search over accredited clinical guidelines (NICE, NHS, WHO) powered by **pgvector** and Gemini embeddings (`text-embedding-004`). Every clinical recommendation is verifiable with numbered citation chips (e.g., `[1]`), preventing hallucinations.
+- **Pre-Flight Deterministic Emergency Detection**:
+  - Scans user input **before** invoking AI models with **100% recall** across 126 red-flag trigger phrases (cardiac, breathing, stroke FAST signs, severe hemorrhage, altered consciousness, anaphylaxis, acute poisoning, self-harm, and infant distress).
+  - Bypasses LLM completely during emergencies with 0ms latency, instantly redirecting the client to `/emergency` with one-tap `112` and `108` calling bridges.
 - **Post-Flight Output Guardrails**:
-  - Scans model outputs before transmission to the user for drug dosages (e.g. `500mg`, `10ml`, `take 2 tablets`), diagnostic assertions (`"you have [illness]"`), prescriptions (`"I prescribe"`, `"you should take [drug]"`), and prompt leakage.
-  - Automatically retries Gemini once with safety instructions or delivers a safe fallback response without exposing unsafe text.
-- **Zero-Footprint Privacy Architecture**:
-  - Symptom inquiries and chat turns reside exclusively in volatile client-side React memory.
-  - Zero messages saved to `localStorage`, `sessionStorage`, cookies, or remote databases. All conversation data is instantly wiped on page reload or tab closure.
-- **Production Edge Resilience**:
-  - In-memory rate limiting (15 requests/minute per IP) with friendly cooldown timers.
-  - Browser online/offline detection with sticky top status banners and automatic reconnection.
-  - Standalone 404 page with emergency dispatch integration.
-  - Health check endpoint at `/api/health`.
-- **Accessibility & WCAG 2.1 Level AA**:
-  - Fully keyboard operable with visible 2px teal focus rings.
-  - Strict heading hierarchy (single `H1` per page, sequential `H2` / `H3`).
-  - Screen reader message stream (`role="log"`, `aria-live="polite"`).
-  - Programmatic focus on emergency alert headings upon navigation.
-  - Comprehensive `prefers-reduced-motion` animation suppression.
-  - Mobile dynamic viewport units (`dvh`) for virtual keyboard accommodation.
+  - Scans model outputs before transmission to the client for drug dosages (e.g. `500mg`, `10ml`, `take 2 tablets`), diagnostic assertions (`"you have [condition]"`), prescriptions (`"I prescribe"`), and prompt leakage.
+  - Automatically retries the model once with safety constraints or delivers a safe fallback response without exposing unsafe text.
+- **Laboratory Report Explainer (Text & Multimodal File Upload)**:
+  - Supports pasted text (up to 8,000 characters) or uploaded files (PDF, PNG, JPG up to 5 MB).
+  - **Magic-number byte sniffing**: Validates genuine binary file signatures, rejecting disguised files.
+  - **Zero file storage**: Uploaded files are processed in volatile server memory buffers and discarded immediately.
+  - Normalizes units, evaluates reference intervals, and renders status chips (Normal, High, Low, Critical) with patient-friendly plain-language explanations.
+  - **Critical Alert Banner**: Instantly triggers an amber-to-red banner when life-critical values are detected (e.g., severe hyperkalemia, critical hypoglycemia).
+- **Personalised Clinical Context (Consent-Gated)**:
+  - Takes patient profile attributes (age, sex, pregnancy status, allergies, chronic conditions) into account to adjust clinical caution (e.g. lowering doctor thresholds for asthmatics or pregnant patients).
+  - Strict privacy boundary: Profile data is treated as untrusted context; it can never override safety rules or prompt instructions.
+- **Doctor Visit Summary & A4 Clinical PDF Export**:
+  - Automatically builds structured consultation summaries (symptoms, duration, urgency tier, key answers, 3 GP discussion questions).
+  - Generates downloadable, printable A4 PDF documents with official SafeSteps branding, urgency badges, multilingual fonts, and mandatory clinical disclaimers.
+- **Multilingual Support (English, Tamil, Hindi)**:
+  - Full interface localization in English (`en`), தமிழ் (`ta`), and हिन्दी (`hi`) using `next-intl`.
+  - Handles code-switched queries (Hinglish and Tanglish) with 100% emergency recall.
+  - High-fidelity PDF rendering with Google `Noto Sans Tamil` and `Noto Sans Devanagari` font embedding.
+- **India DPDP Act 2023 Privacy Compliance**:
+  - Mandatory informed consent recording (`consent_version`, `consent_accepted_at`).
+  - Right to access: One-click "Export as JSON" data portability.
+  - Right to erasure: Complete account and data deletion cascade (deleting profiles, conversations, messages, reports, report values, and auth accounts using administrative service-role client).
+  - Non-clinical anonymized audit logging.
 
 ---
 
-## 🛠️ Tech Stack
+## 🏗️ System Architecture
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Framework** | Next.js 16 (App Router, Turbopack, Server-Side API Routes) |
-| **Language** | TypeScript 5 (Strict Mode) |
-| **Styling & Design** | Tailwind CSS v4, Google Stitch Clinical Design System |
-| **Icons & Typography** | Lucide React, Google Font `Inter` |
-| **AI SDK & Model** | Google Gen AI SDK (`@google/genai`), Google Gemini 3.5 Flash (`gemini-3.5-flash`) |
-| **Validation** | Zod v4 (Request payloads and response schemas) |
-| **Unit Testing** | Vitest 5 |
-| **Deployment** | Vercel Serverless Edge Platform |
+```mermaid
+flowchart TD
+    subgraph Client["Client Tier (Browser & Mobile PWA)"]
+        UI["Next.js 16 UI (Tailwind CSS v4)"]
+        Lang["next-intl (en / ta / hi)"]
+        AudioCall["Emergency Calling (112 / 108 / 14416)"]
+    end
 
----
+    subgraph Edge["Vercel Edge & Middleware Tier"]
+        Proxy["Proxy / Middleware (Auth Session & Route Guarding)"]
+        RateLimit["Rate Limiter (15 req/min Sliding Window)"]
+    end
 
-## 📸 Screenshots & UI Showcase
+    subgraph Server["SafeSteps Application Server Tier"]
+        ChatRoute["POST /api/chat"]
+        ReportRoute["POST /api/reports"]
+        PdfRoute["GET /api/summary/.../pdf"]
+        ExportRoute["GET /api/user/export"]
+        DeleteRoute["POST /api/user/delete"]
 
-<!--
-Place real screenshots in docs/screenshots/ and update the paths below.
--->
+        subgraph Safety["Safety Core"]
+            PreFlight["Pre-Flight Emergency Check (126 Patterns)"]
+            Guardrail["Post-Flight Guardrail (Doses, Diagnoses, Leaks)"]
+        end
 
-| Desktop Landing (`/`) | Mobile Viewport with Sticky CTA (390px) |
-| :---: | :---: |
-| *(Screenshot Placeholder: Landing Hero & Interactive Preview)* | *(Screenshot Placeholder: Mobile Landing with Sticky 112 Bar)* |
+        subgraph AI["Dual-Engine AI Tier"]
+            Groq["Primary: Groq (openai/gpt-oss-120b)"]
+            Gemini["Fallback: Google Gemini 3.5 Flash"]
+        end
+    end
 
-| Clinical Symptom Chat (`/chat`) | Urgency Result Card (Level 2) |
-| :---: | :---: |
-| *(Screenshot Placeholder: Chat Consultation & Suggestion Chips)* | *(Screenshot Placeholder: Structured Urgency Card & Actions)* |
+    subgraph Data["Supabase Cloud Tier (PostgreSQL + RLS)"]
+        Auth["Supabase Auth (JWT Cookies)"]
+        VectorDB["pgvector (768-dim HNSW Index)"]
+        Tables["Relational Tables (profiles, conversations, reports)"]
+        AdminRole["Service Role Client (Admin / Ingestion / Deletion)"]
+    end
 
-| Emergency Alert Takeover (`/emergency`) | 404 Exception Page (`/not-found`) |
-| :---: | :---: |
-| *(Screenshot Placeholder: 112/108 Dials & Tele-MANAS Support)* | *(Screenshot Placeholder: Standalone 404 with Emergency Box)* |
+    UI --> Proxy
+    Proxy --> RateLimit
+    RateLimit --> ChatRoute
+    RateLimit --> ReportRoute
+    RateLimit --> PdfRoute
+    RateLimit --> ExportRoute
+    RateLimit --> DeleteRoute
 
----
-
-## 🛡️ How the Multi-Layer Safety Architecture Works
-
-SafeSteps implements defense-in-depth across the conversational lifecycle:
-
+    ChatRoute --> PreFlight
+    PreFlight -- Emergency Detected --> AudioCall
+    PreFlight -- Safe / Non-Emergency --> VectorDB
+    VectorDB -- Relevant Chunks --> AI
+    AI --> Guardrail
+    Guardrail --> Tables
+    Tables --> UI
+    DeleteRoute --> AdminRole
+    AdminRole --> Tables
+    AdminRole --> Auth
 ```
-User Input
-    │
-    ▼
-┌────────────────────────────────────────────────────────┐
-│ Layer 1: Pre-Flight Emergency Check (BEFORE the Model) │
-│ - Regex catalog across 9 acute emergency categories     │
-│ - Clause-isolated negation engine (ignores "no pain")   │
-│ - Immediate bypass to /emergency on positive match     │
-└──────────────────────────┬─────────────────────────────┘
-                           │ (Safe / Non-Emergency)
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│ Layer 2: System Prompt Triage Constraints               │
-│ - 3-5 clarifying questions, strict Indian triage norms │
-│ - Never diagnose ("this may suggest", never "you have")│
-│ - Never prescribe medications, dosages, or durations   │
-│ - Output forced to strict JSON response schema         │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│ Layer 3: Gemini Inference & Zod Schema Validation      │
-│ - Gemini 3.5 Flash with responseMimeType="app/json"    │
-│ - Validated against QuestionResponse / ResultResponse  │
-│ - Automatic single retry if JSON formatting fails       │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│ Layer 4: Post-Flight Output Guardrail (AFTER the Model)│
-│ - Scans message, headline, suggests, actions, warnings │
-│ - Blocks dosages (500mg, 10ml, take 2, every 6 hrs)    │
-│ - Blocks diagnostic claims & prescription language      │
-│ - Blocks prompt leakage ("system prompt", instructions)│
-│ - Single retry with correction; safe fallback on fail   │
-└──────────────────────────┬─────────────────────────────┘
-                           │
-                           ▼
-Valid, Guardrailed Response Delivered to Browser
+
+---
+
+## 🔄 Chat Message Clinical Data Flow
+
+Every chat message sent through `/api/chat` passes through five deterministic validation and safety gates:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Patient / User
+    participant Route as Next.js API (/api/chat)
+    participant Guard as Pre-Flight Emergency Check
+    participant RAG as Supabase pgvector (RAG)
+    participant AI as Dual-Engine (Groq / Gemini)
+    participant Guardrail as Post-Flight Output Guardrail
+    participant DB as Supabase PostgreSQL (RLS)
+
+    User->>Route: POST /api/chat { messages, language }
+    Note over Route: Validate Zod schema & enforce IP rate limit
+    
+    Route->>Guard: checkEmergency(latestMessage)
+    alt Life-Threatening Emergency Detected
+        Guard-->>Route: Emergency Flag = TRUE (Category, 112 Reason)
+        Route-->>User: HTTP 200 { type: "emergency", 112 redirection }
+    else Non-Emergency Symptom
+        Guard-->>Route: Emergency Flag = FALSE
+        
+        Route->>RAG: retrieveContext(query, language)
+        RAG-->>Route: Relevant Guidelines & Verified Chunks
+        
+        Route->>AI: generateAIResponse(messages + RAG + Profile Context)
+        AI-->>Route: Raw JSON Output
+        
+        Route->>Guardrail: checkOutput(modelOutput)
+        alt Unsafe Dosage, Diagnosis, or Leak Found
+            Note over Guardrail: Retry AI once; fallback to safe clinical guidance
+            Guardrail-->>Route: Safe Sanitized Guidance
+        else Output Compliant
+            Guardrail-->>Route: Validated Clinical Result
+        end
+        
+        opt User is Signed In
+            Route->>DB: Persist turn to 'conversations' & 'messages'
+        end
+        
+        Route-->>User: HTTP 200 { type: "result" / "question", urgency, sources }
+    end
 ```
+
+---
+
+## 🛡️ Multi-Layer Clinical Safety Architecture
+
+SafeSteps implements defense-in-depth across the consultation lifecycle:
+
+1. **Layer 1: Pre-Flight Deterministic Emergency Detector (BEFORE AI)**:
+   - Scans user input before invoking any AI model using regex patterns across 9 categories.
+   - **100% recall** verified against 126 clinical red-flag test cases.
+   - Clause-isolated negation engine prevents false positives on benign phrases (e.g. *"no chest pain"*).
+   - If positive, execution bypasses AI models completely, returning immediate 112 emergency advice.
+2. **Layer 2: Semantic Retrieval Grounding (RAG)**:
+   - Queries `kb_chunks` using cosine distance over 768-dimensional embeddings generated with `text-embedding-004`.
+   - Forces the model to cite reference material using `[1]`, `[2]`.
+   - If no relevant guidelines exist, the assistant explicitly states: *"I don't have trusted reference material on this specific point."*
+3. **Layer 3: System Prompt Clinical Constraints & Role Integrity**:
+   - Strictly enforces Indian clinical norms: 1-2 focused questions at a time with quick replies (adaptive pacing).
+   - Never diagnoses conditions (uses *"this can be associated with"*, never *"you have"*).
+   - Declines medication dosage calculations and prescription titration requests.
+   - Resists prompt injection, role overrides, and system prompt leakage attempts.
+4. **Layer 4: Post-Flight Output Guardrail (AFTER AI)**:
+   - Scans generated headlines, summaries, and action plans.
+   - Blocks any output containing medicine dosages (`500mg`, `10ml`), diagnostic assertions, or leaked instructions.
+   - Executes a single corrective retry; if still non-compliant, serves a deterministic safe fallback.
+5. **Layer 5: Non-Blocking Fault Tolerance**:
+   - If Supabase, vector retrieval, or primary Groq inference fails, SafeSteps gracefully falls back to Gemini and core clinical rules without failing the patient.
+
+---
+
+## 🔒 Privacy & Data Protection (DPDP Act 2023)
+
+SafeSteps is engineered to comply with the **Digital Personal Data Protection (DPDP) Act, 2023**:
+
+- **No Permanent Lab File Storage**:
+  - Laboratory files (PDFs, images) are parsed transiently in server memory byte streams and immediately discarded.
+  - Zero raw files or patient medical records are written to persistent disk or cloud storage buckets.
+- **Informed Consent Gate**:
+  - Users must accept the clinical consent agreement (`consent_version`, `consent_accepted_at`) before accessing consultations.
+  - Personalisation can be toggled ON or OFF at any time in Profile or Settings.
+- **Data Portability (Right to Access)**:
+  - Users can download their complete record at `/settings` with one click ("Export as JSON").
+- **Permanent Erasure Cascade (Right to Erasure)**:
+  - Users can delete their account at `/settings` by typing `DELETE`.
+  - The server executes an administrative service-role cascade deleting all conversations, messages, reports, report values, and profiles, followed by the Supabase Auth user record.
+- **Anonymized Audit Trails**:
+  - Non-clinical audit logs record system operations (`action`) without logging message content, tokens, or biomarker values.
 
 ---
 
 ## ⚙️ Environment Variables
 
-Create `.env.local` in the project root based on `.env.example`:
+Configure `.env.local` based on `.env.example`:
 
 | Variable | Description | Required | Scope / Prefix Rule |
 | :--- | :--- | :---: | :--- |
-| `GROQ_API_KEY` | Server-side API key for Groq clinical triage engine. | Optional | Server-only (No prefix) |
-| `GROQ_MODEL` | Groq model identifier (`openai/gpt-oss-120b`). | Optional | Server-only (No prefix) |
-| `GEMINI_API_KEY` | Server-side API key for Google Gemini from Google AI Studio. | **Yes** | Server-only (No prefix) |
-| `GEMINI_MODEL` | Gemini model identifier (`gemini-3.5-flash`). | **Yes** | Server-only (No prefix) |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project API URL. | **Yes** | Client & Server (`NEXT_PUBLIC_`) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous API key (subject to RLS). | **Yes** | Client & Server (`NEXT_PUBLIC_`) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (bypasses RLS). | **Yes** | **Server-only (Never prefix)** |
-| `GEMINI_EMBEDDING_MODEL` | Gemini model for vector embeddings (`text-embedding-004`). | Optional | Server-only (No prefix) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project API URL | **Yes** | Client & Server (`NEXT_PUBLIC_`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Anon Key (subject to RLS) | **Yes** | Client & Server (`NEXT_PUBLIC_`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Service Role Secret (Bypasses RLS) | **Yes** | **Server-only (Never prefix)** |
+| `GEMINI_API_KEY` | Google Gemini API Key | **Yes** | **Server-only (Never prefix)** |
+| `GEMINI_MODEL` | Gemini Model Name (`gemini-3.5-flash`) | **Yes** | Public / Server |
+| `GEMINI_EMBEDDING_MODEL` | Gemini Embedding Model (`text-embedding-004`) | **Yes** | Server-only |
+| `GROQ_API_KEY` | Groq API Key (Primary inference engine) | Optional | **Server-only (Never prefix)** |
+| `GROQ_MODEL` | Groq Model Name (`openai/gpt-oss-120b`) | Optional | Server-only |
 
-> 🔒 **Security Rules:**
-> - Never prefix secret keys (`GEMINI_API_KEY`, `GROQ_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) with `NEXT_PUBLIC_`.
-> - `SUPABASE_SERVICE_ROLE_KEY` has full administrative database privileges. It is strictly guarded by `'server-only'` in `src/lib/supabase/admin.ts` and must never be exposed to browser bundles.
-> - Never commit `.env.local` or any secrets to version control.
-
----
-
-## 🗄️ Supabase Setup
-
-### 1. Create a Supabase Project
-1. Log in to [Supabase](https://supabase.com/).
-2. Click **New Project**, choose your organization, enter a project name (e.g., `safesteps`), and select a database region close to your users.
-3. Set a strong database password and click **Create new project**.
-
-### 2. Copy the Project URL and API Keys
-1. In your Supabase project dashboard, navigate to **Project Settings** (gear icon in sidebar) -> **API**.
-2. Copy the credentials into your local `.env.local` file:
-   - **Project URL:** Copy the URL and assign it to `NEXT_PUBLIC_SUPABASE_URL`.
-   - **Project API Keys -> `anon` (public):** Copy the key and assign it to `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-   - **Project API Keys -> `service_role` (secret):** Click reveal, copy the secret key, and assign it to `SUPABASE_SERVICE_ROLE_KEY`.
-
-### 3. Understanding Which Key is Which
-- **`NEXT_PUBLIC_SUPABASE_ANON_KEY` (Anon Key):**
-  - **What it is:** The public client-side API key.
-  - **Where it is used:** In browser Client Components via `src/lib/supabase/client.ts` and authenticated Server Components / Route Handlers via `src/lib/supabase/server.ts`.
-  - **Security:** Safe for client-side inclusion because all requests are restricted by Supabase **Row Level Security (RLS)** policies.
-- **`SUPABASE_SERVICE_ROLE_KEY` (Service Role Key):**
-  - **What it is:** The root administrator secret key.
-  - **Where it is used:** Exclusively on the server via `src/lib/supabase/admin.ts` for specialized backend tasks (data ingestion, clinical guideline seeding, permanent account deletion).
-  - **Security:** **Bypasses all Row Level Security.** Must NEVER have the `NEXT_PUBLIC_` prefix, must NEVER be imported into Client Components, and must NEVER be committed to Git. Guarded by the `'server-only'` import guard.
-
-### 4. Verify Database Connectivity
-Once configured in `.env.local`, start your local server and verify the database connection:
-```bash
-# Check database health check probe
-curl http://localhost:3000/api/health/db
-# Expected response: {"status":"ok"}
-```
+> [!CAUTION]
+> **Never prefix secret keys (`SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`) with `NEXT_PUBLIC_`.**  
+> `SUPABASE_SERVICE_ROLE_KEY` has full administrative database privileges and is strictly protected by `import 'server-only'` in `src/lib/supabase/admin.ts`.
 
 ---
 
-## 🚀 Local Development Setup
+## 🚀 Quick Start & Local Setup
 
 ### 1. Prerequisites
-- **Node.js**: v18.18.0 or newer (v20+ recommended)
+- **Node.js**: v20.x or newer
 - **npm**: v9+
+- A Supabase project with `pgvector` enabled
 
-### 2. Installation
+### 2. Installation & Setup
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/safesteps.git
-cd safesteps
+git clone https://github.com/mujahith9025/SafeSteps.git
+cd SafeSteps
 
 # Install dependencies
 npm install
-```
 
-### 3. Environment Configuration
-```bash
-# Copy example environment configuration
+# Copy environment template
 cp .env.example .env.local
-
-# Edit .env.local with your Gemini API credentials
-# GEMINI_API_KEY=your_key_here
-# GEMINI_MODEL=gemini-3.5-flash
+# Fill in Supabase and Gemini credentials in .env.local
 ```
 
-### 4. Running the App
+### 3. Run Quality Gates & Tests
 ```bash
-# Start local development server with Turbopack
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 5. Running Tests & Quality Checks
-```bash
-# Run Vitest unit test suite (emergency recall, guardrails, rate limit, validation)
+# 1. Run full Vitest suite (19 test files / 226 tests)
 npm test
 
-# Run ESLint code quality audit
+# 2. Verify i18n key parity across en, ta, hi
+npm run check-i18n
+
+# 3. Run ESLint code quality check
 npm run lint
 
-# Build production bundle
+# 4. Compile Next.js production build with Turbopack
 npm run build
 ```
 
----
-
-## 📂 Folder Structure
-
-```text
-Safe Steps/
-├── docs/
-│   ├── design-review.md        # Cross-screen design audit & WCAG AA verification table
-│   ├── design-spec.md          # Comprehensive design tokens, copy inventory & Stitch spec
-│   └── manual-test-plan.md     # 27-row manual QA test matrix & execution script
-├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── chat/route.ts   # Core backend chat endpoint (rate limit, emergency, Gemini, guardrail)
-│   │   │   ├── health/
-│   │   │   │   ├── route.ts    # Application health check endpoint (GET /api/health)
-│   │   │   │   └── db/route.ts # Database connectivity health probe (GET /api/health/db)
-│   │   │   └── ...
-│   │   ├── chat/page.tsx       # Conversational symptom triage page
-│   │   ├── emergency/page.tsx  # High-acuity emergency takeover screen with 112/108 dials
-│   │   ├── error.tsx           # Global Next.js runtime error boundary
-│   │   ├── globals.css         # Tailwind v4 theme, contrast colors, focus outlines, reduced motion
-│   │   ├── layout.tsx          # Root HTML layout with skip link, header disclaimer, navbar & footer
-│   │   ├── not-found.tsx       # Standalone 404 page matching Stitch design
-│   │   └── page.tsx            # Main landing page composing all landing sections
-│   ├── components/
-│   │   ├── chat/               # Chat UI: Window, Bubble, Input, Chips, UrgencyCard, States
-│   │   ├── landing/            # Landing UI: Hero, HowItWorks, UrgencyLevels, Safety, CTA, StickyCTA
-│   │   ├── layout/             # Global Layout: Navbar, Footer, Logo, DisclaimerBanner
-│   │   └── ui/                 # Foundational primitives: Button, Card, Badge
-│   ├── hooks/
-│   │   └── useChat.ts          # Client-side chat state machine, retry support, error classification
-│   ├── lib/
-│   │   ├── chatClient.ts       # Client API fetcher & custom ChatApiError mapping
-│   │   ├── gemini.ts           # Singleton Google Gen AI client & model resolver
-│   │   ├── rateLimit.ts        # In-memory sliding window rate limiter (15 req/min per IP)
-│   │   └── supabase/           # Supabase client factory (browser, server, admin)
-│   │       ├── admin.ts        # Service role client with 'server-only' guard
-│   │       ├── client.ts       # Browser client using anon key
-│   │       └── server.ts       # Server client using cookies via @supabase/ssr
-│   ├── prompts/
-│   │   └── system.txt          # Production SafeSteps clinical system instructions
-│   ├── safety/
-│   │   ├── emergency.ts        # Pre-flight emergency detection engine & clause negation
-│   │   ├── emergencyPatterns.ts# Regex patterns for 9 emergency categories
-│   │   ├── emergency.test-cases.ts # 30 trigger & 20 non-trigger benchmark test phrases
-│   │   ├── guardrail.ts        # Post-flight AI output guardrail engine
-│   │   ├── guardrailPatterns.ts# Regex patterns for dosages, diagnoses, prescriptions, leaks
-│   │   └── guardrail.test-cases.ts # 10 unsafe & 10 safe benchmark response test cases
-│   └── types/
-│       ├── chat.ts             # Message, ChatState, ApiChatMessage, UrgencyResult interfaces
-│       └── response.ts         # Zod schemas for QuestionResponse, ResultResponse, EmergencyResponse
-├── tests/
-│   ├── emergency.test.ts       # Vitest suite verifying 100% emergency recall (30/30 triggers)
-│   ├── guardrail.test.ts       # Vitest suite verifying output guardrail blocking & passing
-│   └── validation-ratelimit.test.ts # Vitest suite for Zod payload checks & rate limiting
-├── .env.example                # Example environment variables template
-├── .gitignore                  # Git ignore rules (protecting .env.local, .next, node_modules)
-├── DEPLOY.md                   # Step-by-step Vercel deployment guide & smoke test checklist
-├── next.config.ts              # Next.js security headers (nosniff, DENY, strict-origin)
-├── package.json                # Project dependencies, scripts & metadata
-├── tsconfig.json               # TypeScript compiler configuration
-└── vitest.config.mjs           # Vitest configuration with @ alias resolution
+### 4. Start Development Server
+```bash
+npm run dev
 ```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
 ## ⚠️ Known Limitations
 
-1. **No User Accounts or Authentication**: Intentionally designed without sign-in or user profiles to prevent storing identifiable medical history.
-2. **Volatile In-Memory Session**: Conversations exist only in active browser memory. Refreshing or closing the tab permanently clears the conversation.
-3. **Single-Instance Rate Limiting**: The built-in rate limiter operates in-memory (`Map<string, RateLimitRecord>`) suitable for Level 1 single-instance deployments. Multi-instance serverless deployments require a shared store (e.g. Upstash Redis).
-4. **General Health Guidance Only**: SafeSteps assists in determining urgency level; it cannot confirm diagnoses, order blood tests, or replace direct physician examination.
-5. **English Primary Interface**: Level 1 focuses on English-language interactions with Indian emergency dispatch phone integration (112, 108, 14416).
+1. **Informational & Triage Guidance Only**: SafeSteps assists in determining urgency level; it cannot confirm definitive diagnoses, order clinical lab tests, or substitute for direct physician examination.
+2. **Multilingual Knowledge Base Coverage**: Clinical guideline chunks in `knowledge/` are currently maintained primarily in English with cross-lingual embeddings; localized regional guidelines are ongoing.
+3. **Single-Instance Rate Limiting**: In-memory IP rate limiting operates per server instance; distributed multi-region deployments should pair with a shared key-value store (e.g. Upstash Redis).
+4. **Third-Party AI Service Availability**: Dependent on Google Gemini and Groq API uptime; resilience fallbacks ensure safe degradation if an upstream service is temporarily throttled.
 
 ---
 
-## 📄 License & Credits
+## 📄 License & Compliance Standards
 
-- Developed for academic health-tech demonstration.
-- Design specifications inspired by the Google Stitch Clinical Design System.
+- Built in compliance with **India Digital Personal Data Protection (DPDP) Act, 2023** and **NHS Digital DCB0129/DCB0160 Clinical Safety Management System** principles.
+- UI components engineered to **WCAG 2.1 Level AA** accessibility standards.
+- Developed as an academic and clinical health technology demonstration.
