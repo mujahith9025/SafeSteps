@@ -1,0 +1,25 @@
+# SafeSteps
+
+> Calm, kind AI health guidance assistant helping users understand symptoms and make informed decisions on care urgency.
+
+## Overview
+SafeSteps is a clinical-grade health guidance and triage assistant built for educational triage, laboratory report comprehension, and doctor visit preparation.
+
+## Core Capabilities
+- **Symptom Triage**: Structured symptom assessment mapping to self-care, doctor-visit, or emergency care.
+- **Emergency Detection**: Instant redirection for high-acuity red flags (chest pain, stroke signs, severe hemorrhage, respiratory failure).
+- **Clinical Knowledge Retrieval**: Grounded medical guidance citing verified public health guidelines.
+- **Laboratory Report Explanations**: Plain-language patient explanations for blood tests and pathology markers.
+- **Doctor Visit Summary**: Printable and downloadable A4 PDF visit briefs.
+- **Privacy & Safety**: Compliant with India DPDP Act 2023; transient report parsing and right to data erasure.
+- **Multilingual Support**: Available in English, Tamil (தமிழ்), and Hindi (हिन्दी).
+
+## Key Links
+- [Portal Home](https://safesteps-kappa.vercel.app/): Main portal and symptom starter tools.
+- [Emergency Help](https://safesteps-kappa.vercel.app/emergency): Immediate emergency numbers (112, 108, 14416) and first-aid instructions.
+- [Symptom Chat](https://safesteps-kappa.vercel.app/chat): Care navigation consultation.
+- [Privacy Policy](https://safesteps-kappa.vercel.app/privacy): Data protection and consent terms.
+- [Terms of Service](https://safesteps-kappa.vercel.app/terms): Platform scope and medical governance.
+
+## Medical Governance Notice
+SafeSteps is strictly an educational triage assistant. It never provides definitive medical diagnoses, never prescribes medication doses, and never replaces a consultation with a qualified medical professional. In an emergency, dial 112 or 108 immediately.

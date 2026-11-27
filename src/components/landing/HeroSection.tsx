@@ -143,7 +143,7 @@ export function HeroSection() {
                     <span>1. Hydrate &amp; step away from screens for 20 mins.</span>
                     <span>2. Rest in a softly lit, quiet space.</span>
                   </div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">
+                  <div className="text-[11px] text-slate-600 font-medium mt-0.5">
                     SafeSteps Clinical Guidance &bull; Non-diagnostic
                   </div>
                 </div>
@@ -152,7 +152,7 @@ export function HeroSection() {
 
             {/* Simulated Input Dock */}
             <div className="p-3 bg-white border-t border-slate-200/80 flex items-center gap-2">
-              <div className="flex-1 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-400">
+              <div className="flex-1 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-600 font-medium">
                 Type symptoms... e.g. mild fever
               </div>
               <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shrink-0">

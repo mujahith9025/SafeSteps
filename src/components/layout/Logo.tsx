@@ -63,7 +63,11 @@ export function Logo({
 
   if (href) {
     return (
-      <Link href={href} aria-label="SafeSteps Home" className="inline-flex" tabIndex={tabIndex}>
+      <Link
+        href={href}
+        className="inline-flex"
+        tabIndex={tabIndex}
+      >
         {content}
       </Link>
     );

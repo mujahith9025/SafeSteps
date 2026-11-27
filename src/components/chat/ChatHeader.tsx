@@ -28,7 +28,7 @@ export function ChatHeader({
         <button
           type="button"
           onClick={() => setShowMobileDisclaimer((prev) => !prev)}
-          className="text-info-text hover:text-primary p-1 rounded min-h-[32px] min-w-[32px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="text-info-text hover:text-primary p-2 rounded min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-expanded={showMobileDisclaimer}
           aria-label={showMobileDisclaimer ? "Hide disclaimer details" : "Show disclaimer details"}
         >
@@ -59,7 +59,7 @@ export function ChatHeader({
             variant="secondary"
             size="sm"
             onClick={onNewChat}
-            className="h-10 px-3.5 text-caption font-semibold rounded-xl gap-1.5 border-border hover:bg-slate-50"
+            className="h-10 px-3.5 text-caption font-semibold rounded-xl gap-1.5 border-border hover:bg-slate-50 min-h-[44px]"
             aria-label="Start a new chat session"
           >
             <Plus className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
@@ -82,7 +82,7 @@ export function ChatHeader({
             size="sm"
             href="/emergency"
             aria-label="Emergency Help: Call 112 or view emergency steps"
-            className="h-10 px-3.5 sm:px-4 text-caption font-semibold rounded-xl gap-2 shadow-xs"
+            className="h-10 px-3.5 sm:px-4 text-caption font-semibold rounded-xl gap-2 shadow-xs min-h-[44px]"
           >
             <PhoneCall className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Emergency Help</span>
@@ -101,7 +101,7 @@ export function ChatHeader({
           {/* Step 1: Symptoms */}
           <div
             className={`flex items-center gap-1.5 font-medium transition-colors ${
-              currentStep >= 1 ? "text-primary" : "text-slate-400"
+              currentStep >= 1 ? "text-primary" : "text-slate-600"
             }`}
           >
             <span
@@ -110,7 +110,7 @@ export function ChatHeader({
                   ? "bg-primary text-white"
                   : currentStep === 1
                   ? "bg-primary text-white ring-2 ring-primary/25"
-                  : "bg-slate-200 text-slate-500"
+                  : "bg-slate-200 text-slate-700"
               }`}
             >
               {currentStep > 1 ? "✓" : "1"}
@@ -130,7 +130,7 @@ export function ChatHeader({
           {/* Step 2: Safety Check */}
           <div
             className={`flex items-center gap-1.5 font-medium transition-colors ${
-              currentStep >= 2 ? "text-primary" : "text-slate-400"
+              currentStep >= 2 ? "text-primary" : "text-slate-600"
             }`}
           >
             <span
@@ -139,7 +139,7 @@ export function ChatHeader({
                   ? "bg-primary text-white"
                   : currentStep === 2
                   ? "bg-primary text-white ring-2 ring-primary/25 animate-pulse"
-                  : "bg-slate-200 text-slate-500"
+                  : "bg-slate-200 text-slate-700"
               }`}
             >
               {currentStep > 2 ? "✓" : "2"}
@@ -159,14 +159,14 @@ export function ChatHeader({
           {/* Step 3: Care Guidance */}
           <div
             className={`flex items-center gap-1.5 font-medium transition-colors ${
-              currentStep === 3 ? "text-emerald-700 font-bold" : "text-slate-400"
+              currentStep === 3 ? "text-emerald-700 font-bold" : "text-slate-600"
             }`}
           >
             <span
               className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
                 currentStep === 3
                   ? "bg-emerald-600 text-white ring-2 ring-emerald-600/30"
-                  : "bg-slate-200 text-slate-500"
+                  : "bg-slate-200 text-slate-700"
               }`}
             >
               3

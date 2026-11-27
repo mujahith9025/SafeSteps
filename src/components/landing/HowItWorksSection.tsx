@@ -61,7 +61,7 @@ export function HowItWorksSection() {
             >
               {/* Step indicator watermark */}
               <div
-                className="absolute top-4 right-4 text-3xl font-extrabold text-slate-100 select-none"
+                className="absolute top-4 right-4 text-3xl font-extrabold text-slate-500 select-none"
                 aria-hidden="true"
               >
                 {s.step}

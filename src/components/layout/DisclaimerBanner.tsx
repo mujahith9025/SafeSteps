@@ -30,10 +30,10 @@ export function DisclaimerBanner({
       {showEmergencyCall && (
         <a
           href="tel:112"
-          aria-label="Call emergency services 112 immediately"
-          className="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full transition-colors shrink-0"
+          aria-label={`${t("callEmergency")}: Emergency Services 112`}
+          className="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-xs font-semibold px-3 py-1.5 rounded-full transition-colors shrink-0 min-h-[36px]"
         >
-          <PhoneCall className="w-3 h-3" aria-hidden="true" />
+          <PhoneCall className="w-3.5 h-3.5" aria-hidden="true" />
           <span>{t("callEmergency")}</span>
         </a>
       )}

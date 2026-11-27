@@ -93,7 +93,7 @@ export function Footer() {
 
         {/* Bottom Row: Copyright Notice */}
         <div className="pt-4 text-center md:text-left text-caption text-text-muted border-t border-border/40">
-          <p>© 2024 SafeSteps AI Assistant. All rights reserved.</p>
+          <p>© 2026 SafeSteps AI Assistant. All rights reserved.</p>
         </div>
       </div>
     </footer>

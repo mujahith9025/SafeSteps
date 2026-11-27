@@ -79,7 +79,7 @@ export function Navbar() {
             size="sm"
             href="/emergency"
             aria-label="Emergency Help: Call 112 or open emergency guidance"
-            className="h-10 px-3.5 sm:px-4 text-caption font-semibold"
+            className="h-10 min-h-[44px] px-3.5 sm:px-4 text-caption font-semibold"
           >
             <PhoneCall className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden xs:inline">Emergency Help</span>
@@ -93,7 +93,7 @@ export function Navbar() {
               variant="primary"
               size="sm"
               href="/chat"
-              className="h-10 px-5 text-caption font-semibold"
+              className="h-10 min-h-[44px] px-5 text-caption font-semibold"
             >
               <MessageSquareText className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>Start Chat</span>
@@ -108,7 +108,7 @@ export function Navbar() {
             aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={isOpen}
             aria-controls="mobile-nav"
-            className="md:hidden h-10 w-10 flex items-center justify-center rounded-xl text-text-main hover:bg-slate-100 active:bg-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            className="md:hidden h-11 w-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-text-main hover:bg-slate-100 active:bg-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           >
             {isOpen ? (
               <X className="h-6 w-6" aria-hidden="true" />

@@ -44,9 +44,8 @@ export default function AuthLayout({
           <Link
             href="/"
             className="flex items-center gap-2.5 mb-6 group transition-transform hover:scale-105"
-            aria-label="Return to SafeSteps home"
           >
-            <div className="w-8 h-8 rounded-xl bg-teal-700 text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-teal-700 text-white flex items-center justify-center shadow-xs" aria-hidden="true">
               <span className="font-bold text-sm tracking-tighter">SS</span>
             </div>
             <div className="text-left">
@@ -71,7 +70,7 @@ export default function AuthLayout({
             <strong className="text-slate-700 font-semibold">112</strong> (All Services) or{' '}
             <strong className="text-slate-700 font-semibold">108</strong> (Ambulance).
           </p>
-          <div className="flex items-center justify-center gap-4 text-slate-400 pt-1">
+          <div className="flex items-center justify-center gap-4 text-slate-600 font-medium pt-1">
             <Link href="/" className="hover:text-teal-700 transition-colors">
               Home
             </Link>

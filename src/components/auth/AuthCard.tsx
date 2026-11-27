@@ -66,8 +66,8 @@ export function AuthCard({
 
       {/* Trust & Privacy Reassurance */}
       {trustNote && (
-        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-slate-400 text-center">
-          <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-slate-600 font-medium text-center">
+          <Lock className="w-3.5 h-3.5 text-teal-700 shrink-0" />
           <span>{trustNote}</span>
         </div>
       )}
