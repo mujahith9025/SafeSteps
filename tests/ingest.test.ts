@@ -178,6 +178,9 @@ Drink plenty of fluids, rest in a cool room, and monitor temperature regularly.`
       expect(mockClient.models.embedContent).toHaveBeenCalledWith({
         model: DEFAULT_EMBEDDING_MODEL,
         contents: 'Sample test text',
+        config: {
+          outputDimensionality: EXPECTED_DIMENSION,
+        },
       })
     })
 

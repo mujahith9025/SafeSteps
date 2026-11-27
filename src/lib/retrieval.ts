@@ -86,11 +86,14 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
   const response = await client.models.embedContent({
     model,
     contents: query,
+    config: {
+      outputDimensionality: EXPECTED_EMBEDDING_DIM,
+    },
   });
 
   const values =
-    (response as any).embedding?.values ||
-    (response as any).embeddings?.[0]?.values;
+    (response as any).embeddings?.[0]?.values ||
+    (response as any).embedding?.values;
 
   if (!values || !Array.isArray(values)) {
     throw new Error("Gemini returned an empty query embedding.");

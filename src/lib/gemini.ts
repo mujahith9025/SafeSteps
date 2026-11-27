@@ -47,8 +47,8 @@ export function getGeminiModel(): string {
 }
 
 /**
- * Retrieves the configured Gemini embedding model name (defaults to 'text-embedding-004').
+ * Retrieves the configured Gemini embedding model name (defaults to 'gemini-embedding-001').
  */
 export function getGeminiEmbeddingModel(): string {
-  return process.env.GEMINI_EMBEDDING_MODEL || "text-embedding-004";
+  return process.env.GEMINI_EMBEDDING_MODEL || "gemini-embedding-001";
 }

@@ -20,7 +20,7 @@ import { createClient } from '@supabase/supabase-js'
 
 // Target vector embedding dimension configured in Supabase schema (20261126000000_create_safesteps_schema.sql)
 export const EXPECTED_DIMENSION = 768
-export const DEFAULT_EMBEDDING_MODEL = 'text-embedding-004'
+export const DEFAULT_EMBEDDING_MODEL = 'gemini-embedding-001'
 
 export interface KbFrontMatter {
   title: string
@@ -313,11 +313,14 @@ export async function embedWithBackoff(
       const response = await client.models.embedContent({
         model,
         contents: text,
+        config: {
+          outputDimensionality: expectedDim,
+        },
       })
 
       const values =
-        (response as any).embedding?.values ||
-        (response as any).embeddings?.[0]?.values
+        (response as any).embeddings?.[0]?.values ||
+        (response as any).embedding?.values
 
       if (!values || !Array.isArray(values)) {
         throw new Error('Gemini API returned an empty embedding response.')
